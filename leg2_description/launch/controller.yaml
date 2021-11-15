@@ -5,11 +5,11 @@ leg2_controller:
     publish_rate: 50
 
   # Position Controllers --------------------------------------
-  Rev10_position_controller:
+  Rev14_position_controller:
     type: effort_controllers/JointPositionController
-    joint: Rev10
+    joint: Rev14
     pid: {p: 100.0, i: 0.01, d: 10.0}
-  Rev11_position_controller:
+  Rev15_position_controller:
     type: effort_controllers/JointPositionController
-    joint: Rev11
+    joint: Rev15
     pid: {p: 100.0, i: 0.01, d: 10.0}
