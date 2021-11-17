@@ -1,0 +1,252 @@
+<?xml version="1.0" ?>
+<robot name="Assembly1" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:include filename="$(find Assembly1_description)/urdf/materials.xacro" />
+<xacro:include filename="$(find Assembly1_description)/urdf/Assembly1.trans" />
+<xacro:include filename="$(find Assembly1_description)/urdf/Assembly1.gazebo" />
+<link name="base_link">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0.0008116968153299715 0.0002710417334023734 0.18385367151920742"/>
+    <mass value="1.0586434789147041"/>
+    <inertia ixx="0.002833" ixy="-3.4e-05" ixz="2e-06" iyy="0.011841" iyz="1e-06" izz="0.014053"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="thigh2_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0.019395259201627088 0.01766021822779701 -0.037794954464271"/>
+    <mass value="0.04400791173082409"/>
+    <inertia ixx="5.6e-05" ixy="-0.0" ixz="2.8e-05" iyy="7.1e-05" iyz="1e-06" izz="2.3e-05"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0.135632 0.114267 -0.175971"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/thigh2_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0.135632 0.114267 -0.175971"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/thigh2_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="tibia2_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-0.08107476830557903 0.010611677617225035 -0.06775085724345226"/>
+    <mass value="0.021261016618021673"/>
+    <inertia ixx="1.4e-05" ixy="-0.0" ixz="-1.6e-05" iyy="3.4e-05" iyz="-0.0" izz="2.1e-05"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0.04037 0.107267 -0.120971"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/tibia2_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0.04037 0.107267 -0.120971"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/tibia2_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="thigh4_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0.019395260390741104 0.017661130684431675 -0.037794773435430196"/>
+    <mass value="0.044007911730823815"/>
+    <inertia ixx="5.6e-05" ixy="-0.0" ixz="2.8e-05" iyy="7.1e-05" iyz="1e-06" izz="2.3e-05"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.136868 0.113934 -0.175971"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/thigh4_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.136868 0.113934 -0.175971"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/thigh4_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="tibia4_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-0.08107476711646638 0.009612590073858632 -0.06775067621461164"/>
+    <mass value="0.021261016618021662"/>
+    <inertia ixx="1.4e-05" ixy="-0.0" ixz="-1.6e-05" iyy="3.4e-05" iyz="-0.0" izz="2.1e-05"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.23213 0.105934 -0.120971"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/tibia4_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.23213 0.105934 -0.120971"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/tibia4_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="tibia1_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-0.0810747683055447 -0.009611709359822071 -0.06775078849701355"/>
+    <mass value="0.0212610166180217"/>
+    <inertia ixx="1.4e-05" ixy="0.0" ixz="-1.6e-05" iyy="3.4e-05" iyz="0.0" izz="2.1e-05"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0.04037 -0.106318 -0.121039"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/tibia1_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0.04037 -0.106318 -0.121039"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/tibia1_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="thigh1_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0.019395259201613058 -0.017660249970393255 -0.03779488571785314"/>
+    <mass value="0.04400791173082441"/>
+    <inertia ixx="5.6e-05" ixy="0.0" ixz="2.8e-05" iyy="7.1e-05" iyz="-1e-06" izz="2.3e-05"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0.135632 -0.114318 -0.176039"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/thigh1_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="0.135632 -0.114318 -0.176039"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/thigh1_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="thigh3_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0.01939525979132689 -0.017660233651984547 -0.037794952807587046"/>
+    <mass value="0.04400791173082455"/>
+    <inertia ixx="5.6e-05" ixy="0.0" ixz="2.8e-05" iyy="7.1e-05" iyz="-1e-06" izz="2.3e-05"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.136868 -0.114332 -0.175971"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/thigh3_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.136868 -0.114332 -0.175971"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/thigh3_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="tibia3_1">
+  <inertial>
+    <origin rpy="0 0 0" xyz="-0.08107476771583144 -0.009611693041412323 -0.06775085558674855"/>
+    <mass value="0.02126101661802164"/>
+    <inertia ixx="1.4e-05" ixy="0.0" ixz="-1.6e-05" iyy="3.4e-05" iyz="0.0" izz="2.1e-05"/>
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="-0.23213 -0.106332 -0.120971"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/tibia3_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin rpy="0 0 0" xyz="-0.23213 -0.106332 -0.120971"/>
+    <geometry>
+      <mesh filename="package://Assembly1_description/meshes/tibia3_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<joint name="Rev80" type="continuous">
+  <origin rpy="0 0 0" xyz="-0.135632 -0.114267 0.175971"/>
+  <parent link="base_link"/>
+  <child link="thigh2_1"/>
+  <axis xyz="0.0 1.0 -0.0"/>
+</joint>
+
+<joint name="Rev81" type="continuous">
+  <origin rpy="0 0 0" xyz="0.095262 0.007 -0.055"/>
+  <parent link="thigh2_1"/>
+  <child link="tibia2_1"/>
+  <axis xyz="0.0 -1.0 0.0"/>
+</joint>
+
+<joint name="Rev82" type="continuous">
+  <origin rpy="0 0 0" xyz="0.136868 -0.113934 0.175971"/>
+  <parent link="base_link"/>
+  <child link="thigh4_1"/>
+  <axis xyz="-0.0 -1.0 0.0"/>
+</joint>
+
+<joint name="Rev83" type="continuous">
+  <origin rpy="0 0 0" xyz="0.095262 0.008 -0.055"/>
+  <parent link="thigh4_1"/>
+  <child link="tibia4_1"/>
+  <axis xyz="0.0 -1.0 0.0"/>
+</joint>
+
+<joint name="Rev84" type="continuous">
+  <origin rpy="0 0 0" xyz="0.095262 -0.008 -0.055"/>
+  <parent link="thigh1_1"/>
+  <child link="tibia1_1"/>
+  <axis xyz="-0.0 -1.0 0.0"/>
+</joint>
+
+<joint name="Rev85" type="continuous">
+  <origin rpy="0 0 0" xyz="-0.135632 0.114318 0.176039"/>
+  <parent link="base_link"/>
+  <child link="thigh1_1"/>
+  <axis xyz="0.0 1.0 -0.0"/>
+</joint>
+
+<joint name="Rev86" type="continuous">
+  <origin rpy="0 0 0" xyz="0.136868 0.114332 0.175971"/>
+  <parent link="base_link"/>
+  <child link="thigh3_1"/>
+  <axis xyz="0.0 -1.0 0.0"/>
+</joint>
+
+<joint name="Rev87" type="continuous">
+  <origin rpy="0 0 0" xyz="0.095262 -0.008 -0.055"/>
+  <parent link="thigh3_1"/>
+  <child link="tibia3_1"/>
+  <axis xyz="-0.0 -1.0 0.0"/>
+</joint>
+
+</robot>

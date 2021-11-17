@@ -1,0 +1,39 @@
+Assembly1_controller:
+  # Publish all joint states -----------------------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50
+
+  # Position Controllers --------------------------------------
+  Rev80_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: Rev80
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  Rev81_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: Rev81
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  Rev82_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: Rev82
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  Rev83_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: Rev83
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  Rev84_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: Rev84
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  Rev85_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: Rev85
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  Rev86_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: Rev86
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  Rev87_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: Rev87
+    pid: {p: 100.0, i: 0.01, d: 10.0}
