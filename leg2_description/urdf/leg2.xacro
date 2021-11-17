@@ -6,9 +6,9 @@
 <xacro:include filename="$(find leg2_description)/urdf/leg2.gazebo" />
 <link name="base_link">
   <inertial>
-    <origin rpy="0 0 0" xyz="-0.040787746026007786 -0.02111451815251765 0.1376231595379788"/>
-    <mass value="0.06622023740694938"/>
-    <inertia ixx="1.1e-05" ixy="-0.0" ixz="-0.0" iyy="1.8e-05" iyz="0.0" izz="8e-06"/>
+    <origin rpy="0 0 0" xyz="-0.035178677173068926 0.020361442759306778 0.14526924522292778"/>
+    <mass value="0.07098555583740974"/>
+    <inertia ixx="6.2e-05" ixy="-1e-05" ixz="4e-06" iyy="3.1e-05" iyz="2e-06" izz="7.5e-05"/>
   </inertial>
   <visual>
     <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -25,60 +25,60 @@
   </collision>
 </link>
 
-<link name="Component1_Mirror___1__1_1_1">
+<link name="thigh_1">
   <inertial>
-    <origin rpy="0 0 0" xyz="-0.002900781804186417 0.025112436018918757 -0.04359871686720297"/>
-    <mass value="0.18142577340592403"/>
-    <inertia ixx="0.000281" ixy="-2e-06" ixz="-0.0" iyy="0.00029" iyz="6e-06" izz="1.8e-05"/>
+    <origin rpy="0 0 0" xyz="-0.002104361960605823 0.017651626772934526 -0.042462025219402164"/>
+    <mass value="0.058833278634128135"/>
+    <inertia ixx="9.7e-05" ixy="0.0" ixz="-0.0" iyy="9.5e-05" iyz="1e-06" izz="9e-06"/>
   </inertial>
   <visual>
     <origin rpy="0 0 0" xyz="0.04079 0.016228 -0.132102"/>
     <geometry>
-      <mesh filename="package://leg2_description/meshes/Component1_Mirror___1__1_1_1.stl" scale="0.001 0.001 0.001"/>
+      <mesh filename="package://leg2_description/meshes/thigh_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
     <origin rpy="0 0 0" xyz="0.04079 0.016228 -0.132102"/>
     <geometry>
-      <mesh filename="package://leg2_description/meshes/Component1_Mirror___1__1_1_1.stl" scale="0.001 0.001 0.001"/>
+      <mesh filename="package://leg2_description/meshes/thigh_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
 
-<link name="tibia_1_1_1">
+<link name="tibia_1">
   <inertial>
-    <origin rpy="0 0 0" xyz="-0.04986513207289888 -0.00592119041929677 0.005272222836999563"/>
-    <mass value="0.15554603496118452"/>
-    <inertia ixx="8e-06" ixy="-1e-06" ixz="3e-06" iyy="0.000237" iyz="0.0" izz="0.000234"/>
+    <origin rpy="0 0 0" xyz="-0.04986439883191778 0.008578809581268974 0.0052722228367173135"/>
+    <mass value="0.028136989763679243"/>
+    <inertia ixx="1e-06" ixy="-0.0" ixz="1e-06" iyy="4.3e-05" iyz="0.0" izz="4.2e-05"/>
   </inertial>
   <visual>
-    <origin rpy="0 0 0" xyz="0.040789 -0.007772 -0.022102"/>
+    <origin rpy="0 0 0" xyz="0.04079 0.007228 -0.022102"/>
     <geometry>
-      <mesh filename="package://leg2_description/meshes/tibia_1_1_1.stl" scale="0.001 0.001 0.001"/>
+      <mesh filename="package://leg2_description/meshes/tibia_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
     <material name="silver"/>
   </visual>
   <collision>
-    <origin rpy="0 0 0" xyz="0.040789 -0.007772 -0.022102"/>
+    <origin rpy="0 0 0" xyz="0.04079 0.007228 -0.022102"/>
     <geometry>
-      <mesh filename="package://leg2_description/meshes/tibia_1_1_1.stl" scale="0.001 0.001 0.001"/>
+      <mesh filename="package://leg2_description/meshes/tibia_1.stl" scale="0.001 0.001 0.001"/>
     </geometry>
   </collision>
 </link>
 
-<joint name="Rev14" type="continuous">
+<joint name="Rev16" type="continuous">
   <origin rpy="0 0 0" xyz="-0.04079 -0.016228 0.132102"/>
   <parent link="base_link"/>
-  <child link="Component1_Mirror___1__1_1_1"/>
+  <child link="thigh_1"/>
   <axis xyz="2e-06 1.0 0.0"/>
 </joint>
 
-<joint name="Rev15" type="continuous">
-  <origin rpy="0 0 0" xyz="1e-06 0.024 -0.11"/>
-  <parent link="Component1_Mirror___1__1_1_1"/>
-  <child link="tibia_1_1_1"/>
-  <axis xyz="2e-06 1.0 0.0"/>
+<joint name="Rev17" type="continuous">
+  <origin rpy="0 0 0" xyz="0.0 0.009 -0.11"/>
+  <parent link="thigh_1"/>
+  <child link="tibia_1"/>
+  <axis xyz="-2e-06 -1.0 -0.0"/>
 </joint>
 
 </robot>
