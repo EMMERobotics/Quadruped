@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 
   ros::Publisher chatter_pub = n.advertise<std_msgs::String>("servo", 1000);
 
-  ros::Rate loop_rate(10);
+  ros::Rate loop_rate(1);
 
   /**
    * A count of how many messages we have sent. This is used to create
@@ -31,15 +31,15 @@ int main(int argc, char **argv)
 
     std::stringstream ss;
 
-    if (count % 100 < 50) {
-        ss << "hello world " << count;
+    if (count % 20 < 10) {
+        ss << "#1P1800T1000\r\n"  << count;
         msg.data = ss.str();
 
         ROS_INFO("%s", msg.data.c_str());
     }
 
     else {
-        ss << "not hello world " << count;
+        ss << "#1P1500T1000\r\n"  << count;
         msg.data = ss.str();
 
         ROS_INFO("%s", msg.data.c_str());

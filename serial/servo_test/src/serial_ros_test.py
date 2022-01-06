@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 import rospy
 import time
 import serial
@@ -19,7 +19,8 @@ time.sleep(1)
 
 def callback(data):
     rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
-    serial_port.write(data.data.encode())
+    temp_1 = data.data + "\r\n"
+    serial_port.write(temp_1.encode())
 
   
 
@@ -33,4 +34,3 @@ def listener():
 
 if __name__ == '__main__':
     listener()
-
