@@ -7,7 +7,7 @@ class Kinematics
 
     int dt;
     //config parameters (time ms, lenght mm)
-    dt = 100;
+    //dt = 100;
 
     //link lenght
     #define LEG_LENGHT 110
