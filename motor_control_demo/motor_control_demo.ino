@@ -1,7 +1,7 @@
 // 2100 tibia 900 femur
-const int offset_tibia_1 = 30;
+const int offset_tibia_1 = 90;
 const int offset_tibia_2 = 5;
-const int offset_tibia_3 = 40;
+const int offset_tibia_3 = 100;
 const int offset_tibia_4 = 0;
 
 const int offset_femur_1 = -10;
@@ -9,10 +9,10 @@ const int offset_femur_2 = 10;
 const int offset_femur_3 = 40;
 const int offset_femur_4 = -10;
 
-const int offset_waist_1 = -35;
+const int offset_waist_1 = -50;
 const int offset_waist_2 = -25;
-const int offset_waist_3 = 15;
-const int offset_waist_4 = 75;
+const int offset_waist_3 = 45;
+const int offset_waist_4 = 0;
 
 String t = "T400";
 
