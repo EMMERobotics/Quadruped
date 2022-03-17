@@ -62,7 +62,7 @@ class Kinematics
         ticks = 0;
         p_x = 0;
         p_y = 0;
-        p_z = 0; //relative to its default pose with 54 degree angle between links
+        p_z = 0; //relative to its default pose with 45 degree angle between links
 
         if (leg_i == 1 || leg_i == 4) swingPhase = true;
         else swingPhase = false;
@@ -134,11 +134,10 @@ class Kinematics
             (X,Y,Z,R,P,Y) for each stance legs
         */
 
-       float position_x;
-       position_x = STEP_SIZE/2 - (STEP_SIZE*ticks/100);
+       p_x = STEP_SIZE/2 - (STEP_SIZE*ticks/100);
     }
 
-    void compute_swing(int leg_i, int dt, int ticks, float c_x, float x_y, float c_z) {
+    void compute_swing(int ticks) {
         /*
         GOALS:
             Compute the (X,Y,Z,R,P,Y) of each leg from the phase ticks for the swing legs
