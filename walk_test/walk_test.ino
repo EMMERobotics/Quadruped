@@ -14,6 +14,9 @@ Kinematics leg_BR = Kinematics(4, dt);
 void setup() 
 {
 
+  Serial.begin(115200);
+  Serial.print(leg_FL.state.ticks);
+
 }
 
 void loop () 
