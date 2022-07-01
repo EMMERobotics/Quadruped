@@ -6,22 +6,40 @@ long previousMillis;
 //====== LOOP Frequency =======
 int dt = 10;
 
-Kinematics leg_FL = Kinematics(1, dt);
-Kinematics leg_FR = Kinematics(2, dt);
-Kinematics leg_BL = Kinematics(3, dt);
-Kinematics leg_BR = Kinematics(4, dt);
+STATE robot_state = {
+    .dt = dt,
+    .current_time = 0,
+
+    //robot frame curremt pose   
+    .c_x = 0,
+    .c_y = 0,
+    .c_z = 0,
+    .c_R = 0,
+    .c_P = 0,
+    .c_Y = 0,
+
+    .p_x = 0,
+    .p_y = 0,
+    .p_z = 0,
+
+    .ticks = 0,
+    .mode = 0,
+    .pairs = true
+
+};
+
 
 void setup() 
 {
 
   Serial.begin(115200);
-  Serial.print(leg_FL.state.ticks);
 
 }
 
 void loop () 
 {
     currentMillis = millis();
+
     if (currentMillis - previousMillis > dt) 
     {
         previousMillis = currentMillis;
