@@ -37,7 +37,9 @@ int main () {
         //std::cout << "tibia" << leg_FL.tibiaAngle*180/PI << std::endl;
         //std::cout << robot_state.ticks << std::endl;
         gait_controller(robot_state);
-
+        std::cout << "=============================" << std::endl;
+        std::cout << "leg_FL.femurAngle : " << leg_FL.femurAngle << std::endl;
+        std::cout << "leg_FL.tibiaAngle : " << leg_FL.tibiaAngle << std::endl;
     }
     
     return 0;

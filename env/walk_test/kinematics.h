@@ -45,7 +45,7 @@ typedef struct command {
 
 } COMMAND;
 
-void gait_controller(STATE state);
+void gait_controller(STATE &state);
 void compute_stance(STATE state);
 void compute_swing(STATE state);
 void static_trot(STATE state);
@@ -59,9 +59,7 @@ class Leg {
    
    leg_index leg_i;
    
-   float hipAngle;
-   float femurAngle;
-   float tibiaAngle;
+   
    
    float current_x;
    float current_y;
@@ -75,7 +73,10 @@ public:
 
     Leg(leg_index _leg_i);
     void compute_IK_XYZ(float x, float y, float z);
-
+    float hipAngle;
+    float femurAngle;
+    float tibiaAngle;
+    
 };
 
 extern Leg leg_FL;

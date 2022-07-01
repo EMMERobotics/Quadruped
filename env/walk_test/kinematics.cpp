@@ -1,6 +1,6 @@
 #include <math.h>
 #include "kinematics.h"
-
+#include <iostream>
 #define PI 3.14159
 #define _POSIX
 
@@ -97,8 +97,8 @@ Leg leg_BR(BackR);
 #define RATE 4 //Hz
 #define STILLTIME 0.3 //percent of the gait cycle that all 4 legs will be on the ground
 
-void gait_controller(STATE state) {
-
+void gait_controller(STATE &state) {
+    
     /* 
     UNFINISHED
         Add overlap time support
@@ -133,7 +133,6 @@ void gait_controller(STATE state) {
     period_x = 1000 * 1/4;
     ms_per_ticks = period_x / N_TICKS;
     incremented_ticks = ceil(state.dt/ ms_per_ticks); //ceil or floor works better???
-
     state.ticks += 4;
     //std::cout << state.ticks << std::endl;
     if (state.ticks > N_TICKS) state.ticks = N_TICKS;
@@ -142,7 +141,7 @@ void gait_controller(STATE state) {
     //compute_swing(state);
 
     static_trot(state);
-
+//    return state.ticks, state.pairs
 }
 
 float exec_tick = N_TICKS - STILLTIME*N_TICKS;
@@ -153,12 +152,13 @@ void static_trot(STATE state) {
     float z;
 
     if (state.ticks < exec_tick + 1 && state.ticks < exec_tick/2)  {
-        z = Z_HEIGHT*state.ticks/exec_tick/2;
+        z = Z_HEIGHT*state.ticks/(exec_tick/2);
     }
 
     else if (state.ticks < exec_tick + 1 && state.ticks > exec_tick/2) {
-        z = Z_HEIGHT - Z_HEIGHT*state.ticks/exec_tick/2;
+        z = Z_HEIGHT - Z_HEIGHT*(state.ticks/(exec_tick/2)-1);
     }
+    
 
     else {
         z = 0;
@@ -173,13 +173,12 @@ void static_trot(STATE state) {
         leg_FR.compute_IK_XYZ(0, 0, z);
         leg_BL.compute_IK_XYZ(0, 0, z);
     }
-
+//    std::cout << z << std::endl;
     #ifdef _POSIX
-    std::cout << state.ticks << std::endl;
+//    std::cout << state.ticks << std::endl;
         //std::cout << z <<std::endl;
     #endif
 }
-
 
 void compute_stance(STATE state) {
     /*
