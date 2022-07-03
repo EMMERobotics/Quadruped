@@ -1,5 +1,6 @@
 #include <math.h>
 #include "kinematics.h"
+#include <string>
 #include <iostream>
 #define PI 3.14159
 #define _POSIX
@@ -19,6 +20,22 @@
 #define FEMUR_ANGLE_OFFSET 0.7854 //45 degree
 #define TIBIA_ANGLE_OFFSET 1.5708 //90degree1
 //==========================================================================================
+
+const int offset_tibia_1 = 90;
+const int offset_tibia_2 = 5;
+const int offset_tibia_3 = 100;
+const int offset_tibia_4 = 0;
+
+const int offset_femur_1 = -10;
+const int offset_femur_2 = 10;
+const int offset_femur_3 = 40;
+const int offset_femur_4 = -10;
+
+const int offset_waist_1 = -50;
+const int offset_waist_2 = -25;
+const int offset_waist_3 = 45;
+const int offset_waist_4 = 0;
+
 
 /*
     Leg Class
@@ -63,19 +80,37 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
 }
 
 void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
+    
+    int waist_val = hipAngle/180*2000 + 500;
+    int femur_val = femurAngle/180*2000 + 500;
+    int tibia_val = tibiaAngle/180*2000 + 500;
+
     switch (leg_i)
     {
     case FL:
         /* code */
+        String waist = "#1P" + String(waist_val + offset_waist_1) + "T400" + "\r\n";
+        String femur = "#5P" + String(femur_val + offset_femur_1) + "T400" + "\r\n";
+        String tibia = "#9P" + String(tibia_val + offset_tibia_1) + "T400" + "\r\n";
         break;
     
     case FR:
+        String waist = "#2P" + String(waist_val + offset_waist_2) + "T400" + "\r\n";
+        String femur = "#6P" + String(femur_val + offset_femur_2) + "T400" + "\r\n";
+        String tibia = "#10P" + String(tibia_val + offset_tibia_2) + "T400" + "\r\n";
         break;
 
     case BL:
+        String waist = "#3P" + String(waist_val + offset_waist_3) + "T400" + "\r\n";
+        String femur = "#7P" + String(femur_val + offset_femur_3) + "T400" + "\r\n";
+        String tibia = "#11P" + String(tibia_val + offset_tibia_3) + "T400" + "\r\n";
         break;
 
     case BackR:
+
+        String waist = "#4P" + String(waist_val + offset_waist_4) + "T400" + "\r\n";
+        String femur = "#8P" + String(femur_val + offset_femur_4) + "T400" + "\r\n";
+        String tibia = "#12P" + String(tibia_val + offset_tibia_4) + "T400" + "\r\n";
         break;
     
     default:
@@ -141,6 +176,7 @@ void gait_controller(STATE &state) {
     //compute_swing(state);
 
     static_trot(state);
+    
 //    return state.ticks, state.pairs
 }
 

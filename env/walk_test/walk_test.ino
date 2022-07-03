@@ -110,6 +110,5 @@ void loop ()
     {
         previousMillis = currentMillis;
     } 
-    femur(map(leg_FL.femurAngle*360/3.14159, -180, 180, 0, 1500));
-    tibia(map(leg_FL.tibiaAngle*360/3.14159, -180, 180, 0, 1500));
+
 }
