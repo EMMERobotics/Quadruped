@@ -67,10 +67,10 @@ class Leg {
    
    bool contact;
    
-   void motor(float hipAngle, float femurAngle, float tibiaAngle);
+   
 
 public:
-
+    void motor(float hipAngle, float femurAngle, float tibiaAngle);
     Leg(leg_index _leg_i);
     void compute_IK_XYZ(float x, float y, float z);
     float hipAngle;

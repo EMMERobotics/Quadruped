@@ -20,6 +20,7 @@
 #define FEMUR_ANGLE_OFFSET 0.7854 //45 degree
 #define TIBIA_ANGLE_OFFSET 1.5708 //90degree1
 //==========================================================================================
+using namespace std;
 
 const int offset_tibia_1 = 90;
 const int offset_tibia_2 = 5;
@@ -84,39 +85,47 @@ void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
     int waist_val = hipAngle/180*2000 + 500;
     int femur_val = femurAngle/180*2000 + 500;
     int tibia_val = tibiaAngle/180*2000 + 500;
+    string waist;
+    string femur;
+    string tibia;
 
     switch (leg_i)
     {
     case FL:
         /* code */
-        String waist = "#1P" + String(waist_val + offset_waist_1) + "T400" + "\r\n";
-        String femur = "#5P" + String(femur_val + offset_femur_1) + "T400" + "\r\n";
-        String tibia = "#9P" + String(tibia_val + offset_tibia_1) + "T400" + "\r\n";
+        waist = "#1P" + to_string(waist_val + offset_waist_1) + "T400" + "\r\n";
+        femur = "#5P" + to_string(femur_val + offset_femur_1) + "T400" + "\r\n";
+        tibia = "#9P" + to_string(tibia_val + offset_tibia_1) + "T400" + "\r\n";
         break;
     
     case FR:
-        String waist = "#2P" + String(waist_val + offset_waist_2) + "T400" + "\r\n";
-        String femur = "#6P" + String(femur_val + offset_femur_2) + "T400" + "\r\n";
-        String tibia = "#10P" + String(tibia_val + offset_tibia_2) + "T400" + "\r\n";
+        waist = "#2P" + to_string(waist_val + offset_waist_2) + "T400" + "\r\n";
+        femur = "#6P" + to_string(femur_val + offset_femur_2) + "T400" + "\r\n";
+        tibia = "#10P" + to_string(tibia_val + offset_tibia_2) + "T400" + "\r\n";
         break;
 
     case BL:
-        String waist = "#3P" + String(waist_val + offset_waist_3) + "T400" + "\r\n";
-        String femur = "#7P" + String(femur_val + offset_femur_3) + "T400" + "\r\n";
-        String tibia = "#11P" + String(tibia_val + offset_tibia_3) + "T400" + "\r\n";
+        waist = "#3P" + to_string(waist_val + offset_waist_3) + "T400" + "\r\n";
+        femur = "#7P" + to_string(femur_val + offset_femur_3) + "T400" + "\r\n";
+        tibia = "#11P" + to_string(tibia_val + offset_tibia_3) + "T400" + "\r\n";
         break;
 
     case BackR:
 
-        String waist = "#4P" + String(waist_val + offset_waist_4) + "T400" + "\r\n";
-        String femur = "#8P" + String(femur_val + offset_femur_4) + "T400" + "\r\n";
-        String tibia = "#12P" + String(tibia_val + offset_tibia_4) + "T400" + "\r\n";
+        waist = "#4P" + to_string(waist_val + offset_waist_4) + "T400" + "\r\n";
+        femur = "#8P" + to_string(femur_val + offset_femur_4) + "T400" + "\r\n";
+        tibia = "#12P" + to_string(tibia_val + offset_tibia_4) + "T400" + "\r\n";
         break;
     
     default:
         //RAISE ERROR 
         break;
     }
+    
+//    Serial.print(waist);
+//    Serial.print(femur);
+//    Serial.print(tibia);
+
 }
 
 Leg leg_FL(FL);
@@ -176,6 +185,11 @@ void gait_controller(STATE &state) {
     //compute_swing(state);
 
     static_trot(state);
+    
+    leg_FL.motor(leg_FL.hipAngle, leg_FL.femurAngle, leg_FL.tibiaAngle);
+    leg_FR.motor(leg_FR.hipAngle, leg_FR.femurAngle, leg_FR.tibiaAngle);
+    leg_BL.motor(leg_BL.hipAngle, leg_BL.femurAngle, leg_BL.tibiaAngle);
+    leg_BR.motor(leg_BR.hipAngle, leg_BR.femurAngle, leg_BR.tibiaAngle);
     
 //    return state.ticks, state.pairs
 }
