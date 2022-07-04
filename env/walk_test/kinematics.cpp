@@ -82,9 +82,9 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
 
 void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
     
-    int waist_val = hipAngle/180*2000 + 500;
-    int femur_val = femurAngle/180*2000 + 500;
-    int tibia_val = tibiaAngle/180*2000 + 500;
+    int waist_val = hipAngle/PI*2000 + 500;
+    int femur_val = femurAngle/PI*2000 + 500;
+    int tibia_val = tibiaAngle/PI*2000 + 500;
     string waist;
     string femur;
     string tibia;
