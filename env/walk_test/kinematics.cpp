@@ -1,9 +1,5 @@
-#include <math.h>
 #include "kinematics.h"
-#include <string>
-#include <iostream>
 #define PI 3.14159
-#define _POSIX
 
 //============ GAIT PARAMS =============================================
 #define STEP_SIZE 40
@@ -20,7 +16,9 @@
 #define FEMUR_ANGLE_OFFSET 0.7854 //45 degree
 #define TIBIA_ANGLE_OFFSET 1.5708 //90degree1
 //==========================================================================================
-using namespace std;
+
+//============ MOTOR PARAMS =============================================
+#define MOTORTIME 400
 
 const int offset_tibia_1 = 90;
 const int offset_tibia_2 = 5;
@@ -37,15 +35,33 @@ const int offset_waist_2 = -25;
 const int offset_waist_3 = 45;
 const int offset_waist_4 = 0;
 
-
+//==========================================================================================
 /*
     Leg Class
 */
 
 //constuctor
-Leg::Leg(leg_index _leg_i)
+
+//For use with arduino String class only
+
+#if _MCUENABLE == 1
+Leg::Leg(   leg_index _leg_i,
+            String _waist_motor_id,
+            String _femur_motor_id,
+            String _tibia_motor_id,
+            int _waist_offset,
+            int _femur_offset,
+            int _tibia_offset)
 {
     leg_i = _leg_i;
+
+    waist_motor_id = _waist_motor_id;
+    femur_motor_id = _femur_motor_id;
+    tibia_motor_id = _tibia_motor_id;
+
+    waist_offset = _waist_offset;
+    femur_offset = _femur_offset;
+    tibia_offset = _tibia_offset;
 
     hipAngle = PI/2;
     femurAngle = PI/4;
@@ -55,6 +71,11 @@ Leg::Leg(leg_index _leg_i)
     current_z = 0; //relative to its default pose with 45 degree angle between links}
 
 }
+#endif
+
+#if _POSIXENABLE == 1
+
+#endif
 
 void Leg::compute_IK_XYZ(float x, float y, float z) {
 
@@ -78,21 +99,39 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
     hipAngle = acos(HOR_OFFSET/hip_dis) + atan((y +  HOR_OFFSET)/(VERT_OFFSET - z));
     femurAngle = atan(x/(VERT_OFFSET - z)) + acos(leg_dis/ (2*LEG_LENGHT*sqrt(leg_dis)));
     tibiaAngle = acos((2*pow(LEG_LENGHT,2) - leg_dis)/(2*pow(LEG_LENGHT,2)));
+
+    //left side needs to be invert both femur and tibia
+
+    motor(hipAngle, femurAngle, tibiaAngle);
+
 }
 
 void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
     
+    #if _POSIXENABLE == 1
     int waist_val = hipAngle/PI*2000 + 500;
     int femur_val = femurAngle/PI*2000 + 500;
     int tibia_val = tibiaAngle/PI*2000 + 500;
+    #endif
+   
+   float waist_val = hipAngle/PI*2000 + 500 + waist_offset;
+   float femur_val = femurAngle/PI*2000 + 500 + femur_offset;
+   float tibia_val = tibiaAngle/PI*2000 + 500 + tibia_offset;
+
+   SerialParser(waist_motor_id, waist_val, MOTORTIME);
+   SerialParser(femur_motor_id, femur_val, MOTORTIME);
+   SerialParser(tibia_motor_id, tibia_val, MOTORTIME);
+
+    
+    #if _POSIXENABLE == 1
     string waist;
     string femur;
     string tibia;
+    
 
     switch (leg_i)
     {
     case FL:
-        /* code */
         waist = "#1P" + to_string(waist_val + offset_waist_1) + "T400" + "\r\n";
         femur = "#5P" + to_string(femur_val + offset_femur_1) + "T400" + "\r\n";
         tibia = "#9P" + to_string(tibia_val + offset_tibia_1) + "T400" + "\r\n";
@@ -121,17 +160,41 @@ void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
         //RAISE ERROR 
         break;
     }
-    
-//    Serial.print(waist);
-//    Serial.print(femur);
-//    Serial.print(tibia);
+    #endif
 
 }
 
-Leg leg_FL(FL);
-Leg leg_FR(FR);
-Leg leg_BL(BL);
-Leg leg_BR(BackR);
+Leg leg_FL( FL,
+            "#1P",
+            "#5P",
+            "#9P",
+            offset_waist_1,
+            offset_tibia_1,
+            offset_tibia_1);
+
+Leg leg_FR( FR,
+            "#2P",
+            "#6P",
+            "#10P",
+            offset_waist_2,
+            offset_tibia_2,
+            offset_tibia_2);
+
+Leg leg_BL( BL,
+            "#3P",
+            "#7P",
+            "#11P",
+            offset_waist_3,
+            offset_tibia_3,
+            offset_tibia_3);
+
+Leg leg_BR( BackR,
+            "#4P",
+            "#8P",
+            "#12P",
+            offset_waist_4,
+            offset_tibia_4,
+            offset_tibia_4);
 
 /*
     No class
@@ -186,12 +249,13 @@ void gait_controller(STATE &state) {
 
     static_trot(state);
     
+    /*
     leg_FL.motor(leg_FL.hipAngle, leg_FL.femurAngle, leg_FL.tibiaAngle);
     leg_FR.motor(leg_FR.hipAngle, leg_FR.femurAngle, leg_FR.tibiaAngle);
     leg_BL.motor(leg_BL.hipAngle, leg_BL.femurAngle, leg_BL.tibiaAngle);
     leg_BR.motor(leg_BR.hipAngle, leg_BR.femurAngle, leg_BR.tibiaAngle);
+    */
     
-//    return state.ticks, state.pairs
 }
 
 float exec_tick = N_TICKS - STILLTIME*N_TICKS;
@@ -228,6 +292,13 @@ void static_trot(STATE state) {
 //    std::cout << state.ticks << std::endl;
         //std::cout << z <<std::endl;
     #endif
+}
+
+void stand(STATE state) {
+    leg_FL.compute_IK_XYZ(0, 0, 0);
+    leg_BR.compute_IK_XYZ(0, 0, 0);
+    leg_FR.compute_IK_XYZ(0, 0, 0);
+    leg_BL.compute_IK_XYZ(0, 0, 0);
 }
 
 void compute_stance(STATE state) {

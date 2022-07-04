@@ -1,8 +1,19 @@
 #ifndef KINEMATICS_H_
 #define KINEMATICS_H_
 
+#define _MCUENABLE 1
+#define _POSIXENABLE 0
+
 #include <math.h>
+
+#if _POSIXENABLE == 1
 #include <iostream>
+#include <string>
+#endif
+
+#if _MCUENABLE == 1
+#include <Arduino.h>
+#endif
 
 enum leg_index {
     FL, //0
@@ -49,6 +60,7 @@ void gait_controller(STATE &state);
 void compute_stance(STATE state);
 void compute_swing(STATE state);
 void static_trot(STATE state);
+void stand(STATE state);
 
 class Leg {
     /*
@@ -59,20 +71,39 @@ class Leg {
    
    leg_index leg_i;
    
-   
-   
    float current_x;
    float current_y;
    float current_z;
    
    bool contact;
-   
-   
+
+   int waist_offset;
+   int femur_offset;
+   int tibia_offset;
+
+   #if _MCUENABLE == 1
+   String waist_motor_id;
+   String femur_motor_id;
+   String tibia_motor_id;
+   #endif
 
 public:
     void motor(float hipAngle, float femurAngle, float tibiaAngle);
-    Leg(leg_index _leg_i);
+    
+    Leg(  leg_index _leg_i, 
+          String _waist_motor_id,
+          String _femur_motor_id,
+          String _tibia_motor_id,
+          int _waist_offset,
+          int _femur_offset,
+          int _tibia_offset);
+          
     void compute_IK_XYZ(float x, float y, float z);
+
+    #if _MCUENABLE == 1
+    void SerialParser(String motor_id, int pos, int time);
+    #endif
+
     float hipAngle;
     float femurAngle;
     float tibiaAngle;
