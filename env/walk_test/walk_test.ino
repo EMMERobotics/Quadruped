@@ -3,7 +3,7 @@
 #define RX2 16
 #define TX2 17
 
-#define _ESP32 0
+#define _ESP32 1
 
 unsigned long currentMillis;
 unsigned long previousMillis;
@@ -36,7 +36,7 @@ STATE robot_state = {
 
 void setup() {
     Serial.begin(9600, SERIAL_8N1);
-    #if _ESP == 1
+    #if _ESP32 == 1
     Serial1.begin(9600, SERIAL_8N1, RX2, TX2);
     #endif
     start_time = millis();
@@ -49,7 +49,7 @@ void Leg::SerialParser(String motor_id, int pos, int time) {
     String str_pos = String(pos);
     String msg = motor_id + str_pos + str_time + "\r\n";
     Serial.print(msg);
-    #if _ESP == 1
+    #if _ESP32 == 1
     Serial1.print(msg);
     #endif
 }
