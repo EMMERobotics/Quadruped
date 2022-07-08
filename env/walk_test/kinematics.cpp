@@ -1,4 +1,5 @@
 #include "kinematics.h"
+#include <Adafruit_PWMServoDriver.h>
 #define PI 3.14159
 
 //============ GAIT PARAMS =============================================
@@ -15,26 +16,37 @@
 #define HIP_ANGLE_OFFSET 1.5708 //90 degree
 #define FEMUR_ANGLE_OFFSET 0.7854 //45 degree
 #define TIBIA_ANGLE_OFFSET 1.5708 //90degree1
+//motor pulse length
+#define SERVOMIN  72
+#define SERVOMAX  422
+#define SERVODIFF  350
 //==========================================================================================
 
 //============ MOTOR PARAMS =============================================
 #define MOTORTIME 400
 
-const int offset_tibia_1 = 90;
-const int offset_tibia_2 = 5;
-const int offset_tibia_3 = 100;
+const int offset_tibia_1 = 16;
+const int offset_tibia_2 = 1;
+const int offset_tibia_3 = 18;
 const int offset_tibia_4 = 0;
 
-const int offset_femur_1 = -10;
-const int offset_femur_2 = 10;
-const int offset_femur_3 = 40;
-const int offset_femur_4 = -10;
+const int offset_femur_1 = -2;
+const int offset_femur_2 = 2;
+const int offset_femur_3 = 7;
+const int offset_femur_4 = -2;
 
-const int offset_waist_1 = -50;
-const int offset_waist_2 = -25;
-const int offset_waist_3 = 45;
+const int offset_waist_1 = -9;
+const int offset_waist_2 = -4;
+const int offset_waist_3 = 8;
 const int offset_waist_4 = 0;
 
+/*
+#define SERVO_FREQ 50
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+pwm.begin();
+pwm.setOscillatorFrequency(27000000);
+pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates
+*/
 //==========================================================================================
 /*
     Leg Class
@@ -100,7 +112,7 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
     femurAngle = atan(x/(VERT_OFFSET - z)) + acos(leg_dis/ (2*LEG_LENGHT*sqrt(leg_dis)));
     tibiaAngle = acos((2*pow(LEG_LENGHT,2) - leg_dis)/(2*pow(LEG_LENGHT,2)));
 
-    //left side needs to be invert both femur and tibia
+    
 
     motor(hipAngle, femurAngle, tibiaAngle);
 
@@ -114,9 +126,17 @@ void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
     int tibia_val = tibiaAngle/PI*2000 + 500;
     #endif
    
-   float waist_val = hipAngle/PI*2000 + 500 + waist_offset;
-   float femur_val = femurAngle/PI*2000 + 500 + femur_offset;
-   float tibia_val = tibiaAngle/PI*2000 + 500 + tibia_offset;
+   float waist_val = hipAngle/PI*SERVODIFF + SERVOMIN + waist_offset;
+   float femur_val = femurAngle/PI*SERVODIFF + SERVOMIN + femur_offset;
+   float tibia_val = tibiaAngle/PI*SERVODIFF + SERVOMIN + tibia_offset;
+
+   //left side needs to be invert both femur and tibia
+
+    if (leg_index == FL || leg_index == BackR) {
+
+    }
+
+    //if (leg_index == not sure if front or back that needs to be invert
 
    SerialParser(waist_motor_id, waist_val, MOTORTIME);
    SerialParser(femur_motor_id, femur_val, MOTORTIME);
