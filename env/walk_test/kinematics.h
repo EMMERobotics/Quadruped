@@ -87,9 +87,16 @@ class Leg {
    String tibia_motor_id;
    #endif
 
+   #if _POSIXENABLE == 1
+   string waist_motor_id;
+   string femur_motor_id;
+   string tibia_motor_id;
+   #endif
+
 public:
     void motor(float hipAngle, float femurAngle, float tibiaAngle);
     
+    #if _MCUENABLE == 1
     Leg(  leg_index _leg_i, 
           String _waist_motor_id,
           String _femur_motor_id,
@@ -97,6 +104,7 @@ public:
           int _waist_offset,
           int _femur_offset,
           int _tibia_offset);
+    #endif
           
     void compute_IK_XYZ(float x, float y, float z);
 

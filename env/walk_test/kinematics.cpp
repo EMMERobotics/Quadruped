@@ -95,7 +95,7 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
 
     if (leg_i == 2 || leg_i == 4) {
         y *= -1;
-        horr_offset *= -1;  
+        horr_offset *= -1;
     }
 
     //only x,y,z, for now
@@ -125,24 +125,36 @@ void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
     int femur_val = femurAngle/PI*2000 + 500;
     int tibia_val = tibiaAngle/PI*2000 + 500;
     #endif
-   
-   float waist_val = hipAngle/PI*SERVODIFF + SERVOMIN + waist_offset;
-   float femur_val = femurAngle/PI*SERVODIFF + SERVOMIN + femur_offset;
-   float tibia_val = tibiaAngle/PI*SERVODIFF + SERVOMIN + tibia_offset;
 
-   //left side needs to be invert both femur and tibia
+    float tibia_val;
+    float femur_val;
+    float waist_val;
 
-    if (leg_index == FL || leg_index == BackR) {
-
+    if(leg_i == FL || leg_i == BL) {
+        tibia_val = (PI - tibiaAngle)/PI*2000 + 500 + tibia_offset;
+        femur_val = (PI/2 + femurAngle)/PI*2000 + 500 + femur_offset;
     }
 
-    //if (leg_index == not sure if front or back that needs to be invert
+    else {
+        tibia_val = tibiaAngle/PI*2000 + 500 + tibia_offset;
+        femur_val = (PI/2 - femurAngle)/PI*2000 + 500 + femur_offset;
+    }
+
+    if(leg_i == FL || leg_i == FR) {
+        waist_val = (PI - hipAngle)/PI*2000 + 500 + waist_offset;
+    }
+
+    else {
+        waist_val = hipAngle/PI*2000 + 500 + waist_offset;
+    }
+
+
 
    SerialParser(waist_motor_id, waist_val, MOTORTIME);
    SerialParser(femur_motor_id, femur_val, MOTORTIME);
    SerialParser(tibia_motor_id, tibia_val, MOTORTIME);
 
-    
+
     #if _POSIXENABLE == 1
     string waist;
     string femur;
@@ -221,7 +233,7 @@ Leg leg_BR( BackR,
 */
 
 //special macros for testing
-#define RATE 4 //Hz
+#define RATE 16 //Hz
 #define STILLTIME 0.3 //percent of the gait cycle that all 4 legs will be on the ground
 
 void gait_controller(STATE &state) {
@@ -257,10 +269,10 @@ void gait_controller(STATE &state) {
     }
 
     //period_x = 1000 * STEP_SIZE/state.c_x;
-    period_x = 1000 * 1/4;
+    period_x = 1000 * 1/RATE;
     ms_per_ticks = period_x / N_TICKS;
     incremented_ticks = ceil(state.dt/ ms_per_ticks); //ceil or floor works better???
-    state.ticks += 4;
+    state.ticks += incremented_ticks;
     //std::cout << state.ticks << std::endl;
     if (state.ticks > N_TICKS) state.ticks = N_TICKS;
 
@@ -291,6 +303,7 @@ void static_trot(STATE state) {
 
     else if (state.ticks < exec_tick + 1 && state.ticks > exec_tick/2) {
         z = Z_HEIGHT - Z_HEIGHT*(state.ticks/(exec_tick/2)-1);
+        // Z_HEIGHT(2 - (state.ticks/(exec_tick/2))
     }
     
 
