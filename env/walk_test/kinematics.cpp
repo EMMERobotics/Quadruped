@@ -109,7 +109,7 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
     femurAngle = atan(x/(VERT_OFFSET - z)) + acos(leg_dis/ (2*LEG_LENGHT*sqrt(leg_dis)));
     tibiaAngle = acos((2*pow(LEG_LENGHT,2) - leg_dis)/(2*pow(LEG_LENGHT,2)));
 
-    motor(hipAngle, femurAngle, tibiaAngle);
+    motor_arduino(hipAngle, femurAngle, tibiaAngle);
 
 }
 
