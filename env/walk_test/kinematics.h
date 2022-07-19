@@ -94,7 +94,7 @@ class Leg {
    #endif
 
 public:
-    void motor(float hipAngle, float femurAngle, float tibiaAngle);
+    
     
     #if _MCUENABLE == 1
     Leg(  leg_index _leg_i, 
@@ -109,7 +109,8 @@ public:
     void compute_IK_XYZ(float x, float y, float z);
 
     #if _MCUENABLE == 1
-    void SerialParser(String motor_id, int pos, int time);
+    //void SerialParser(String motor_id, int pos, int time);
+    void motor_arduino(float hipAngle, float femurAngle, float tibiaAngle);
     #endif
 
     float hipAngle;

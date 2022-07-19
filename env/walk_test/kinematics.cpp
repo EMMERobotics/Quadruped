@@ -1,5 +1,4 @@
 #include "kinematics.h"
-#include <Adafruit_PWMServoDriver.h>
 #define PI 3.14159
 
 //============ GAIT PARAMS =============================================
@@ -17,9 +16,7 @@
 #define FEMUR_ANGLE_OFFSET 0.7854 //45 degree
 #define TIBIA_ANGLE_OFFSET 1.5708 //90degree1
 //motor pulse length
-#define SERVOMIN  72
-#define SERVOMAX  422
-#define SERVODIFF  350
+
 //==========================================================================================
 
 //============ MOTOR PARAMS =============================================
@@ -112,11 +109,12 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
     femurAngle = atan(x/(VERT_OFFSET - z)) + acos(leg_dis/ (2*LEG_LENGHT*sqrt(leg_dis)));
     tibiaAngle = acos((2*pow(LEG_LENGHT,2) - leg_dis)/(2*pow(LEG_LENGHT,2)));
 
-    
-
     motor(hipAngle, femurAngle, tibiaAngle);
 
 }
+
+/*
+================= MOVE TO .ino FILE TO SUPPORT NEW BOARD ================================
 
 void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
     
@@ -195,6 +193,8 @@ void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
     #endif
 
 }
+*/
+
 
 Leg leg_FL( FL,
             "#1P",
