@@ -22,21 +22,6 @@
 //============ MOTOR PARAMS =============================================
 #define MOTORTIME 400
 
-const int offset_tibia_1 = 16;
-const int offset_tibia_2 = 1;
-const int offset_tibia_3 = 18;
-const int offset_tibia_4 = 0;
-
-const int offset_femur_1 = -2;
-const int offset_femur_2 = 2;
-const int offset_femur_3 = 7;
-const int offset_femur_4 = -2;
-
-const int offset_waist_1 = -9;
-const int offset_waist_2 = -4;
-const int offset_waist_3 = 8;
-const int offset_waist_4 = 0;
-
 /*
 #define SERVO_FREQ 50
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
