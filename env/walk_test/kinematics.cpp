@@ -238,7 +238,7 @@ Leg leg_BR( BackR,
 */
 
 //special macros for testing
-#define RATE 16 //Hz
+#define RATE 4 //Hz
 #define STILLTIME 0.3 //percent of the gait cycle that all 4 legs will be on the ground
 
 void gait_controller(STATE &state) {
