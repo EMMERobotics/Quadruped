@@ -135,12 +135,12 @@ void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
 
     if(leg_i == FL || leg_i == BL) {
         tibia_val = (PI - tibiaAngle)/PI*SERVODIFF + SERVOMIN + tibia_offset;
-        femur_val = (PI - femurAngle)/PI*SERVODIFF + SERVOMIN + femur_offset;
+        femur_val = (PI/2 + femurAngle)/PI*SERVODIFF + SERVOMIN + femur_offset;
     }
 
     else {
         tibia_val = tibiaAngle/PI*SERVODIFF + SERVOMIN + tibia_offset;
-        femur_val = femurAngle/PI*SERVODIFF + SERVOMIN + femur_offset;
+        femur_val = (PI/2 - femurAngle)/PI*SERVODIFF + SERVOMIN + femur_offset;
     }
 
     if(leg_i == FL || leg_i == FR) {
