@@ -20,6 +20,25 @@
 //==========================================================================================
 
 //============ MOTOR PARAMS =============================================
+#define SERVOMIN  500
+#define SERVOMAX  2500
+#define SERVODIFF  2000 // SERVOMAX - SERVOMIN
+#define SERVO_FREQ 50
+
+const int offset_tibia_1 = 90;
+const int offset_tibia_2 = 5;
+const int offset_tibia_3 = 100;
+const int offset_tibia_4 = 0;
+
+const int offset_femur_1 = -10;
+const int offset_femur_2 = 10;
+const int offset_femur_3 = 40;
+const int offset_femur_4 = -10;
+
+const int offset_waist_1 = -50;
+const int offset_waist_2 = -25;
+const int offset_waist_3 = 45;
+const int offset_waist_4 = 0;
 #define MOTORTIME 400
 
 /*
@@ -94,12 +113,13 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
     femurAngle = atan(x/(VERT_OFFSET - z)) + acos(leg_dis/ (2*LEG_LENGHT*sqrt(leg_dis)));
     tibiaAngle = acos((2*pow(LEG_LENGHT,2) - leg_dis)/(2*pow(LEG_LENGHT,2)));
 
-    motor_arduino(hipAngle, femurAngle, tibiaAngle);
+    //motor_arduino(hipAngle, femurAngle, tibiaAngle);
+    motor(hipAngle, femurAngle, tibiaAngle);
 
 }
 
-/*
-================= MOVE TO .ino FILE TO SUPPORT NEW BOARD ================================
+
+//================= MOVE TO .ino FILE TO SUPPORT NEW BOARD ================================
 
 void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
     
@@ -114,21 +134,21 @@ void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
     float waist_val;
 
     if(leg_i == FL || leg_i == BL) {
-        tibia_val = (PI - tibiaAngle)/PI*2000 + 500 + tibia_offset;
-        femur_val = (PI/2 + femurAngle)/PI*2000 + 500 + femur_offset;
+        tibia_val = (PI - tibiaAngle)/PI*SERVODIFF + SERVOMIN + tibia_offset;
+        femur_val = (PI - femurAngle)/PI*SERVODIFF + SERVOMIN + femur_offset;
     }
 
     else {
-        tibia_val = tibiaAngle/PI*2000 + 500 + tibia_offset;
-        femur_val = (PI/2 - femurAngle)/PI*2000 + 500 + femur_offset;
+        tibia_val = tibiaAngle/PI*SERVODIFF + SERVOMIN + tibia_offset;
+        femur_val = femurAngle/PI*SERVODIFF + SERVOMIN + femur_offset;
     }
 
     if(leg_i == FL || leg_i == FR) {
-        waist_val = (PI - hipAngle)/PI*2000 + 500 + waist_offset;
+        waist_val = (PI - hipAngle)/PI*SERVODIFF + SERVOMIN + waist_offset;
     }
 
     else {
-        waist_val = hipAngle/PI*2000 + 500 + waist_offset;
+        waist_val = hipAngle/PI*SERVODIFF + SERVOMIN + waist_offset;
     }
 
 
@@ -178,7 +198,7 @@ void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
     #endif
 
 }
-*/
+
 
 
 Leg leg_FL( FL,
