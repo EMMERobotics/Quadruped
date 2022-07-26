@@ -71,9 +71,9 @@ const int offset_waist_4 = 0;
 
 #if _MCUENABLE == 1
 Leg::Leg(   leg_index _leg_i,
-            int _waist_motor_id,
-            int _femur_motor_id,
-            int _tibia_motor_id,
+            uint8_t _waist_motor_id,
+            uint8_t _femur_motor_id,
+            uint8_t _tibia_motor_id,
             int _waist_offset,
             int _femur_offset,
             int _tibia_offset)
@@ -169,33 +169,33 @@ Leg leg_FL( FL,
             0,
             4,
             8,
-            offset_waist_1,
-            offset_tibia_1,
-            offset_tibia_1);
+            0,
+            0,
+            0);
 
 Leg leg_FR( FR,
             1,
             5,
             9,
-            offset_waist_2,
-            offset_tibia_2,
-            offset_tibia_2);
+            0,
+            0,
+            0);
 
 Leg leg_BL( BL,
             2,
             6,
             10,
-            offset_waist_3,
-            offset_tibia_3,
-            offset_tibia_3);
+            0,
+            0,
+            0);
 
 Leg leg_BR( BackR,
             3,
             7,
             11,
-            offset_waist_4,
-            offset_tibia_4,
-            offset_tibia_4);
+            0,
+            0,
+            0);
 
 /*
     No class

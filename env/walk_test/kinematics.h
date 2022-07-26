@@ -98,9 +98,9 @@ public:
     
     #if _MCUENABLE == 1
     Leg(  leg_index _leg_i, 
-          int _waist_motor_id,
-          int _femur_motor_id,
-          int _tibia_motor_id,
+          uint8_t _waist_motor_id,
+          uint8_t _femur_motor_id,
+          uint8_t _tibia_motor_id,
           int _waist_offset,
           int _femur_offset,
           int _tibia_offset);

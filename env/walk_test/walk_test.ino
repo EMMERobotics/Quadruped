@@ -1,13 +1,15 @@
 #include "kinematics.h"
 
 //servo dependencies
-#include <Adafruit_PWMServoDriver.h>
 #include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
 
 #define RX2 16
 #define TX2 17
 
 #define _ESP32 1 
+
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // ========================== new board ============================
 //servo params
@@ -16,14 +18,13 @@
 #define SERVODIFF  350  // SERVOMAX - SERVOMIN
 #define SERVO_FREQ 50
 
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 //========== Implement motor function here --- BUT this function will still be called in the compute_IK_XYZ() ===
 void Leg::motor_arduino(float hipAngle, float femurAngle, float tibiaAngle) {
 
-    float tibia_val;
-    float femur_val;
-    float waist_val;
+    int tibia_val;
+    int femur_val;
+    int waist_val;
 
     if(leg_i == FL || leg_i == BL) {
         tibia_val = (PI - tibiaAngle)/PI*SERVODIFF + SERVOMIN + tibia_offset;
@@ -43,11 +44,14 @@ void Leg::motor_arduino(float hipAngle, float femurAngle, float tibiaAngle) {
         waist_val = hipAngle/PI*SERVODIFF + SERVOMIN + waist_offset;
     }
 
+    //Serial.println("WaistID: " + String(waist_motor_id) + " " + String(waist_val));
+    //Serial.println("femurID: " + String(femur_motor_id) + " " + String(femur_val));
+    //Serial.println("tibiaID: " + String(tibia_motor_id) + " " + String(tibia_val));
+
     pwm.setPWM(waist_motor_id, 0, waist_val);
     pwm.setPWM(femur_motor_id, 0, femur_val);
     pwm.setPWM(tibia_motor_id, 0, tibia_val);
 
-    
 }
 
 unsigned long currentMillis;
@@ -80,17 +84,19 @@ STATE robot_state = {
 };
 
 void setup() {
-    Serial.begin(9600, SERIAL_8N1);
+    
+    //servo shelid init
+    pwm.begin();
+    pwm.setOscillatorFrequency(27000000);
+    pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates
+    //pwm.setPWM(4, 0, 246);
+
+    //Serial.begin(9600, SERIAL_8N1);
     #if _ESP32 == 1
     //Serial1.begin(9600, SERIAL_8N1, RX2, TX2);
     #endif
     start_time = millis();
     stand(robot_state);
-
-    //servo shelid init
-    pwm.begin();
-    pwm.setOscillatorFrequency(27000000);
-    pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates
     
 
 }
@@ -117,7 +123,7 @@ void loop ()
     //init the robot
     {
         if(et > 5000) {
-            gait_controller(robot_state);   
+            //gait_controller(robot_state);   
         }
         previousMillis = currentMillis;
     } 
