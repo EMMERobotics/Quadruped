@@ -82,9 +82,9 @@ class Leg {
    int tibia_offset;
 
    #if _MCUENABLE == 1
-   String waist_motor_id;
-   String femur_motor_id;
-   String tibia_motor_id;
+   int waist_motor_id;
+   int femur_motor_id;
+   int tibia_motor_id;
    #endif
 
    #if _POSIXENABLE == 1
@@ -98,9 +98,9 @@ public:
     
     #if _MCUENABLE == 1
     Leg(  leg_index _leg_i, 
-          String _waist_motor_id,
-          String _femur_motor_id,
-          String _tibia_motor_id,
+          uint8_t _waist_motor_id,
+          uint8_t _femur_motor_id,
+          uint8_t _tibia_motor_id,
           int _waist_offset,
           int _femur_offset,
           int _tibia_offset);
@@ -109,10 +109,10 @@ public:
     void compute_IK_XYZ(float x, float y, float z);
 
     #if _MCUENABLE == 1
-    void motor(float hipAngle, float femurAngle, float tibiaAngle);
-    void SerialParser(String motor_id, int pos, int time);
+    //void motor(float hipAngle, float femurAngle, float tibiaAngle);
+    //void SerialParser(String motor_id, int pos, int time);
     
-    //void motor_arduino(float hipAngle, float femurAngle, float tibiaAngle);
+    void motor_arduino(float hipAngle, float femurAngle, float tibiaAngle);
     #endif
 
     float hipAngle;

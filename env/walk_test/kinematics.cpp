@@ -3,8 +3,9 @@
 
 //============ GAIT PARAMS =============================================
 #define STEP_SIZE 40
-#define STEP_HEIGHT 10
+#define STEP_HEIGHT 30
 #define N_TICKS 100 // number of ticks per cycle
+#define Z_HEIGHT 40
 
 //============ INVERSE KINEMATICS PARAMS ====================================
 //link lenght
@@ -17,9 +18,12 @@
 #define TIBIA_ANGLE_OFFSET 1.5708 //90degree1
 //motor pulse length
 
+
 //==========================================================================================
 
 //============ MOTOR PARAMS =============================================
+
+/* Serial BOARD
 #define SERVOMIN  500
 #define SERVOMAX  2500
 #define SERVODIFF  2000 // SERVOMAX - SERVOMIN
@@ -40,14 +44,24 @@ const int offset_waist_2 = -25;
 const int offset_waist_3 = 45;
 const int offset_waist_4 = 0;
 #define MOTORTIME 400
-
-/*
-#define SERVO_FREQ 50
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
-pwm.begin();
-pwm.setOscillatorFrequency(27000000);
-pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates
 */
+
+//Adafruit ABORD
+const int offset_tibia_1 = 16;
+const int offset_tibia_2 = 1;
+const int offset_tibia_3 = 18;
+const int offset_tibia_4 = 0;
+
+const int offset_femur_1 = -2;
+const int offset_femur_2 = 2;
+const int offset_femur_3 = 7;
+const int offset_femur_4 = -2;
+
+const int offset_waist_1 = -9;
+const int offset_waist_2 = -4;
+const int offset_waist_3 = 8;
+const int offset_waist_4 = 0;
+
 //==========================================================================================
 /*
     Leg Class
@@ -59,9 +73,9 @@ pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates
 
 #if _MCUENABLE == 1
 Leg::Leg(   leg_index _leg_i,
-            String _waist_motor_id,
-            String _femur_motor_id,
-            String _tibia_motor_id,
+            uint8_t _waist_motor_id,
+            uint8_t _femur_motor_id,
+            uint8_t _tibia_motor_id,
             int _waist_offset,
             int _femur_offset,
             int _tibia_offset)
@@ -113,22 +127,16 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
     femurAngle = atan(x/(VERT_OFFSET - z)) + acos(leg_dis/ (2*LEG_LENGHT*sqrt(leg_dis)));
     tibiaAngle = acos((2*pow(LEG_LENGHT,2) - leg_dis)/(2*pow(LEG_LENGHT,2)));
 
-    //motor_arduino(hipAngle, femurAngle, tibiaAngle);
-    motor(hipAngle, femurAngle, tibiaAngle);
+    motor_arduino(hipAngle, femurAngle, tibiaAngle);
+    //motor(hipAngle, femurAngle, tibiaAngle);
 
 }
 
-
+/*
 //================= MOVE TO .ino FILE TO SUPPORT NEW BOARD ================================
 
 void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
     
-    #if _POSIXENABLE == 1
-    int waist_val = hipAngle/PI*2000 + 500;
-    int femur_val = femurAngle/PI*2000 + 500;
-    int tibia_val = tibiaAngle/PI*2000 + 500;
-    #endif
-
     float tibia_val;
     float femur_val;
     float waist_val;
@@ -151,94 +159,52 @@ void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
         waist_val = hipAngle/PI*SERVODIFF + SERVOMIN + waist_offset;
     }
 
-
-
    SerialParser(waist_motor_id, waist_val, MOTORTIME);
    SerialParser(femur_motor_id, femur_val, MOTORTIME);
    SerialParser(tibia_motor_id, tibia_val, MOTORTIME);
 
-
-    #if _POSIXENABLE == 1
-    string waist;
-    string femur;
-    string tibia;
-    
-
-    switch (leg_i)
-    {
-    case FL:
-        waist = "#1P" + to_string(waist_val + offset_waist_1) + "T400" + "\r\n";
-        femur = "#5P" + to_string(femur_val + offset_femur_1) + "T400" + "\r\n";
-        tibia = "#9P" + to_string(tibia_val + offset_tibia_1) + "T400" + "\r\n";
-        break;
-    
-    case FR:
-        waist = "#2P" + to_string(waist_val + offset_waist_2) + "T400" + "\r\n";
-        femur = "#6P" + to_string(femur_val + offset_femur_2) + "T400" + "\r\n";
-        tibia = "#10P" + to_string(tibia_val + offset_tibia_2) + "T400" + "\r\n";
-        break;
-
-    case BL:
-        waist = "#3P" + to_string(waist_val + offset_waist_3) + "T400" + "\r\n";
-        femur = "#7P" + to_string(femur_val + offset_femur_3) + "T400" + "\r\n";
-        tibia = "#11P" + to_string(tibia_val + offset_tibia_3) + "T400" + "\r\n";
-        break;
-
-    case BackR:
-
-        waist = "#4P" + to_string(waist_val + offset_waist_4) + "T400" + "\r\n";
-        femur = "#8P" + to_string(femur_val + offset_femur_4) + "T400" + "\r\n";
-        tibia = "#12P" + to_string(tibia_val + offset_tibia_4) + "T400" + "\r\n";
-        break;
-    
-    default:
-        //RAISE ERROR 
-        break;
-    }
-    #endif
-
 }
-
+*/
 
 
 Leg leg_FL( FL,
-            "#1P",
-            "#5P",
-            "#9P",
-            offset_waist_1,
-            offset_tibia_1,
-            offset_tibia_1);
+            0,
+            4,
+            8,
+            4,
+            -4,
+            -4);
 
 Leg leg_FR( FR,
-            "#2P",
-            "#6P",
-            "#10P",
-            offset_waist_2,
-            offset_tibia_2,
-            offset_tibia_2);
+            1,
+            5,
+            9,
+            0,
+            4,
+            8);
 
 Leg leg_BL( BL,
-            "#3P",
-            "#7P",
-            "#11P",
-            offset_waist_3,
-            offset_tibia_3,
-            offset_tibia_3);
+            2,
+            6,
+            10,
+            10,
+            0,
+            4);
 
 Leg leg_BR( BackR,
-            "#4P",
-            "#8P",
-            "#12P",
-            offset_waist_4,
-            offset_tibia_4,
-            offset_tibia_4);
+            3,
+            7,
+            11,
+            -12,
+            8,
+            12);
 
 /*
     No class
 */
 
 //special macros for testing
-#define RATE 4 //Hz
+#define RATE 8 //Hz
 #define STILLTIME 0.3 //percent of the gait cycle that all 4 legs will be on the ground
 
 void gait_controller(STATE &state) {
@@ -285,18 +251,11 @@ void gait_controller(STATE &state) {
     //compute_swing(state);
 
     static_trot(state);
-    
-    /*
-    leg_FL.motor(leg_FL.hipAngle, leg_FL.femurAngle, leg_FL.tibiaAngle);
-    leg_FR.motor(leg_FR.hipAngle, leg_FR.femurAngle, leg_FR.tibiaAngle);
-    leg_BL.motor(leg_BL.hipAngle, leg_BL.femurAngle, leg_BL.tibiaAngle);
-    leg_BR.motor(leg_BR.hipAngle, leg_BR.femurAngle, leg_BR.tibiaAngle);
-    */
-    
+
 }
 
 float exec_tick = N_TICKS - STILLTIME*N_TICKS;
-#define Z_HEIGHT 20
+
 
 void static_trot(STATE state) {
 
@@ -378,4 +337,5 @@ void compute_swing(STATE state) {
     Output:
         (X,Y,Z,R,P,Y) for each swing legs
     */
+   
 }
