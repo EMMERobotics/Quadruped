@@ -116,6 +116,7 @@ void Leg::SerialParser(String motor_id, int pos, int time) {
 
 void loop () 
 {
+  
     currentMillis = millis();
     unsigned long et = currentMillis - start_time;
 
@@ -126,6 +127,7 @@ void loop ()
             //gait_controller(robot_state);   
         }
         previousMillis = currentMillis;
-    } 
+    }
+     
 
 }

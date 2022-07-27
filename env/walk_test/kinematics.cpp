@@ -3,8 +3,9 @@
 
 //============ GAIT PARAMS =============================================
 #define STEP_SIZE 40
-#define STEP_HEIGHT 10
+#define STEP_HEIGHT 30
 #define N_TICKS 100 // number of ticks per cycle
+#define Z_HEIGHT 40
 
 //============ INVERSE KINEMATICS PARAMS ====================================
 //link lenght
@@ -16,6 +17,7 @@
 #define FEMUR_ANGLE_OFFSET 0.7854 //45 degree
 #define TIBIA_ANGLE_OFFSET 1.5708 //90degree1
 //motor pulse length
+
 
 //==========================================================================================
 
@@ -169,40 +171,40 @@ Leg leg_FL( FL,
             0,
             4,
             8,
-            0,
-            0,
-            0);
+            4,
+            -4,
+            -4);
 
 Leg leg_FR( FR,
             1,
             5,
             9,
             0,
-            0,
-            0);
+            4,
+            8);
 
 Leg leg_BL( BL,
             2,
             6,
             10,
+            10,
             0,
-            0,
-            0);
+            4);
 
 Leg leg_BR( BackR,
             3,
             7,
             11,
-            0,
-            0,
-            0);
+            -12,
+            8,
+            12);
 
 /*
     No class
 */
 
 //special macros for testing
-#define RATE 4 //Hz
+#define RATE 8 //Hz
 #define STILLTIME 0.3 //percent of the gait cycle that all 4 legs will be on the ground
 
 void gait_controller(STATE &state) {
@@ -253,7 +255,7 @@ void gait_controller(STATE &state) {
 }
 
 float exec_tick = N_TICKS - STILLTIME*N_TICKS;
-#define Z_HEIGHT 20
+
 
 void static_trot(STATE state) {
 
@@ -335,4 +337,5 @@ void compute_swing(STATE state) {
     Output:
         (X,Y,Z,R,P,Y) for each swing legs
     */
+   
 }
