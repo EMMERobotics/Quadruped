@@ -3,9 +3,8 @@
 
 //============ GAIT PARAMS =============================================
 #define STEP_SIZE 40
-#define STEP_HEIGHT 30
+#define STEP_HEIGHT 40
 #define N_TICKS 100 // number of ticks per cycle
-#define Z_HEIGHT 40
 
 //============ INVERSE KINEMATICS PARAMS ====================================
 //link lenght
@@ -16,9 +15,6 @@
 #define HIP_ANGLE_OFFSET 1.5708 //90 degree
 #define FEMUR_ANGLE_OFFSET 0.7854 //45 degree
 #define TIBIA_ANGLE_OFFSET 1.5708 //90degree1
-//motor pulse length
-
-
 //==========================================================================================
 
 //============ MOTOR PARAMS =============================================
@@ -46,21 +42,6 @@ const int offset_waist_4 = 0;
 #define MOTORTIME 400
 */
 
-//Adafruit ABORD
-const int offset_tibia_1 = 16;
-const int offset_tibia_2 = 1;
-const int offset_tibia_3 = 18;
-const int offset_tibia_4 = 0;
-
-const int offset_femur_1 = -2;
-const int offset_femur_2 = 2;
-const int offset_femur_3 = 7;
-const int offset_femur_4 = -2;
-
-const int offset_waist_1 = -9;
-const int offset_waist_2 = -4;
-const int offset_waist_3 = 8;
-const int offset_waist_4 = 0;
 
 //==========================================================================================
 /*
@@ -93,15 +74,11 @@ Leg::Leg(   leg_index _leg_i,
     hipAngle = PI/2;
     femurAngle = PI/4;
     tibiaAngle = PI/2;
-    current_x = 0;
-    current_y = 0;
-    current_z = 0; //relative to its default pose with 45 degree angle between links}
+    //current_x = 0;
+    //current_y = 0;
+    //current_z = 0; //relative to its default pose with 45 degree angle between links}
 
 }
-#endif
-
-#if _POSIXENABLE == 1
-
 #endif
 
 void Leg::compute_IK_XYZ(float x, float y, float z) {
@@ -167,13 +144,15 @@ void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
 */
 
 
-Leg leg_FL( FL,
-            0,
-            4,
-            8,
-            4,
-            -4,
-            -4);
+//========= Adjust offset HERE =================
+
+Leg leg_FL( FL,     //leg index
+            0,      //waist motor number
+            4,      //femur motor number
+            8,      //tibia motor number
+            4,      //waist offset
+            -4,     //femur offset
+            -4);    //tibia offset
 
 Leg leg_FR( FR,
             1,
@@ -247,26 +226,24 @@ void gait_controller(STATE &state) {
     //std::cout << state.ticks << std::endl;
     if (state.ticks > N_TICKS) state.ticks = N_TICKS;
 
-    //compute_stance(state);
     //compute_swing(state);
+    //compute_stance(state);
 
     static_trot(state);
 
 }
 
 float exec_tick = N_TICKS - STILLTIME*N_TICKS;
-
-
 void static_trot(STATE state) {
 
     float z;
 
     if (state.ticks < exec_tick + 1 && state.ticks < exec_tick/2)  {
-        z = Z_HEIGHT*state.ticks/(exec_tick/2);
+        z = STEP_HEIGHT*state.ticks/(exec_tick/2);
     }
 
     else if (state.ticks < exec_tick + 1 && state.ticks > exec_tick/2) {
-        z = Z_HEIGHT - Z_HEIGHT*(state.ticks/(exec_tick/2)-1);
+        z = STEP_HEIGHT - STEP_HEIGHT*(state.ticks/(exec_tick/2)-1);
         // Z_HEIGHT(2 - (state.ticks/(exec_tick/2))
     }
     
@@ -337,5 +314,18 @@ void compute_swing(STATE state) {
     Output:
         (X,Y,Z,R,P,Y) for each swing legs
     */
+
+   float x = (STEP_SIZE*state.ticks/200) - (STEP_SIZE/4);
+   float z = STEP_HEIGHT*sin(state.ticks*(PI/100));
+
+   if (!state.pairs) {
+        leg_FL.compute_IK_XYZ(x, 0, z);
+        leg_BR.compute_IK_XYZ(x, 0, z);
+    }
+
+    else {
+        leg_FR.compute_IK_XYZ(x, 0, z);
+        leg_BL.compute_IK_XYZ(x, 0, z);
+    }
    
 }

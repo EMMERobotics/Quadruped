@@ -73,9 +73,9 @@ STATE robot_state = {
     .c_P = 0,
     .c_Y = 0,
 
-    .p_x = 0,
-    .p_y = 0,
-    .p_z = 0,
+    //.p_x = 0,
+    //.p_y = 0,
+    //.p_z = 0,
 
     .ticks = 0,
     .mode = 0,
