@@ -35,9 +35,9 @@ typedef struct state {
     float c_P;
     float c_Y;
 
-    //float p_x;
-    //float p_y;
-    //float p_z;
+    float p_x;
+    float p_y;
+    float p_z;
 
     int ticks;
     int mode;
@@ -65,28 +65,26 @@ void stand(STATE state);
 class Leg {
     /*
     This class contains:
-        - inverse kinematics solver for each leg
+        - x,y,z inversel kinematics solver for each leg
         - motor interface
     */
    
    leg_index leg_i;
    
-   //float current_x;
-   //float current_y;
-   //float current_z;
+   float current_x;
+   float current_y;
+   float current_z;
    
-   //bool contact;
+   bool contact;
 
    int waist_offset;
    int femur_offset;
    int tibia_offset;
 
-   uint8_t waist_motor_id;
-   uint8_t femur_motor_id;
-   uint8_t tibia_motor_id;
-
    #if _MCUENABLE == 1
-   
+   int waist_motor_id;
+   int femur_motor_id;
+   int tibia_motor_id;
    #endif
 
    #if _POSIXENABLE == 1

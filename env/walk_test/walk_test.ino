@@ -25,7 +25,7 @@ void Leg::motor_arduino(float hipAngle, float femurAngle, float tibiaAngle) {
     int tibia_val;
     int femur_val;
     int waist_val;
-
+    /*
     if(leg_i == FL || leg_i == BL) {
         tibia_val = (PI - tibiaAngle)/PI*SERVODIFF + SERVOMIN + tibia_offset;
         femur_val = (PI/2 + femurAngle)/PI*SERVODIFF + SERVOMIN + femur_offset;
@@ -42,6 +42,25 @@ void Leg::motor_arduino(float hipAngle, float femurAngle, float tibiaAngle) {
 
     else {
         waist_val = hipAngle/PI*SERVODIFF + SERVOMIN + waist_offset;
+    }
+    */
+
+    if(leg_i == FL || leg_i == BL) {
+        tibia_val = tibiaAngle/PI*SERVODIFF + SERVOMIN + tibia_offset;
+        femur_val = femurAngle/PI*SERVODIFF + SERVOMIN + femur_offset;
+    }
+
+    else {
+        tibia_val = (PI - tibiaAngle)/PI*SERVODIFF + SERVOMIN + tibia_offset;
+        femur_val = (PI - femurAngle)/PI*SERVODIFF + SERVOMIN + femur_offset;
+    }
+
+    if(leg_i == FL || leg_i == BackR) {
+        waist_val = hipAngle/PI*SERVODIFF + SERVOMIN + waist_offset;
+    }
+
+    else {
+        waist_val = (PI - hipAngle)/PI*SERVODIFF + SERVOMIN + waist_offset;
     }
 
     //Serial.println("WaistID: " + String(waist_motor_id) + " " + String(waist_val));
@@ -62,20 +81,21 @@ unsigned long start_time;
 int dt = 10;
 
 STATE robot_state = { 
+
     .dt = dt,
     .current_time = 0,
 
-    //robot frame curremt pose   
+    //robot frame current pose   
     .c_x = 0,
     .c_y = 0,
     .c_z = 0,
     .c_R = 0,
     .c_P = 0,
     .c_Y = 0,
-
-    //.p_x = 0,
-    //.p_y = 0,
-    //.p_z = 0,
+    
+    .p_x = 0,
+    .p_y = 0,
+    .p_z = 0,
 
     .ticks = 0,
     .mode = 0,
@@ -116,7 +136,6 @@ void Leg::SerialParser(String motor_id, int pos, int time) {
 
 void loop () 
 {
-  
     currentMillis = millis();
     unsigned long et = currentMillis - start_time;
 
@@ -127,7 +146,6 @@ void loop ()
             //gait_controller(robot_state);   
         }
         previousMillis = currentMillis;
-    }
-     
+    } 
 
 }

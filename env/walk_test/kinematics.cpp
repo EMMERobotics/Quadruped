@@ -82,27 +82,37 @@ Leg::Leg(   leg_index _leg_i,
 #endif
 
 void Leg::compute_IK_XYZ(float x, float y, float z) {
-
+    // refference from front left leg
+    
     float horr_offset = HOR_OFFSET;
 
     if (leg_i == 2 || leg_i == 4) {
         y *= -1;
-        horr_offset *= -1;
     }
 
     //only x,y,z, for now
-    float hip_dis;
-    float leg_dis;
+    float l4_sqrt;
+    float l3_x0_sqrt;
+    float l3_sqrt;
+    float beta;
+    float h;
+    float phi;
     float theta;
+    float zeta;
 
-    hip_dis = pow((VERT_OFFSET - z), 2) + pow(y +  HOR_OFFSET, 2); //squared
-    leg_dis = hip_dis - pow(HOR_OFFSET, 2) + pow(x,2);
-    hip_dis = sqrt(hip_dis);
-    theta = atan(x/(VERT_OFFSET - z));
-    
-    hipAngle = acos(HOR_OFFSET/hip_dis) + atan((y +  HOR_OFFSET)/(VERT_OFFSET - z));
-    femurAngle = atan(x/(VERT_OFFSET - z)) + acos(leg_dis/ (2*LEG_LENGHT*sqrt(leg_dis)));
-    tibiaAngle = acos((2*pow(LEG_LENGHT,2) - leg_dis)/(2*pow(LEG_LENGHT,2)));
+    h = VERT_OFFSET - z;
+    l4_sqrt = pow((h), 2) + pow(y +  HOR_OFFSET, 2);
+    l3_x0_sqrt = l4_sqrt - pow(HOR_OFFSET, 2);
+    l3_sqrt = l3_x0_sqrt + pow(x,2);
+
+    beta = asin(sqrt(l3_x0_sqrt/l4_sqrt)) - atan2(h, y +  HOR_OFFSET);
+    phi = acos((l3_sqrt / (2*pow(LEG_LENGHT, 2))) - 1);
+    theta = atan2(x, h) + PI/2;
+    zeta = atan2(LEG_LENGHT * sin(phi), LEG_LENGHT * (1+cos(phi)));
+
+    hipAngle = beta + PI/2;
+    femurAngle = 180 - (theta - zeta);
+    tibiaAngle = phi;
 
     motor_arduino(hipAngle, femurAngle, tibiaAngle);
     //motor(hipAngle, femurAngle, tibiaAngle);
