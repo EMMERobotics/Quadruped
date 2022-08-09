@@ -111,9 +111,9 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
     zeta = atan2(LEG_LENGHT * sin(phi), LEG_LENGHT * (1+cos(phi)));
 
     hipAngle = beta + PI/2;
-    femurAngle = 180 - (theta - zeta);
-    tibiaAngle = phi; // old leg design
-    // tibiaAngle = PI - phi; // new leg design
+    femurAngle = PI - (theta - zeta);
+    // tibiaAngle = phi; // old leg design
+    tibiaAngle = PI - phi; // new leg design
 
     motor_arduino(hipAngle, femurAngle, tibiaAngle);
     //motor(hipAngle, femurAngle, tibiaAngle);
