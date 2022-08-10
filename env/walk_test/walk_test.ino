@@ -13,10 +13,16 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // ========================== new board ============================
 //servo params
+/*
 #define SERVOMIN  72
 #define SERVOMAX  422
 #define SERVODIFF  350  // SERVOMAX - SERVOMIN
 #define SERVO_FREQ 50
+*/
+#define SERVOMIN  600
+#define SERVOMAX  3300
+#define SERVODIFF  2700  // SERVOMAX - SERVOMIN
+#define SERVO_FREQ 330
 
 
 //========== Implement motor function here --- BUT this function will still be called in the compute_IK_XYZ() ===
@@ -25,7 +31,7 @@ void Leg::motor_arduino(float hipAngle, float femurAngle, float tibiaAngle) {
     int tibia_val;
     int femur_val;
     int waist_val;
-
+    /*
     if(leg_i == FL || leg_i == BL) {
         tibia_val = (PI - tibiaAngle)/PI*SERVODIFF + SERVOMIN + tibia_offset;
         femur_val = (PI/2 + femurAngle)/PI*SERVODIFF + SERVOMIN + femur_offset;
@@ -43,9 +49,28 @@ void Leg::motor_arduino(float hipAngle, float femurAngle, float tibiaAngle) {
     else {
         waist_val = hipAngle/PI*SERVODIFF + SERVOMIN + waist_offset;
     }
+    */
+
+    if(leg_i == FL || leg_i == BL) {
+        tibia_val = tibiaAngle/PI*SERVODIFF + SERVOMIN + tibia_offset;
+        femur_val = femurAngle/PI*SERVODIFF + SERVOMIN + femur_offset;
+    }
+
+    else {
+        tibia_val = (PI - tibiaAngle)/PI*SERVODIFF + SERVOMIN + tibia_offset;
+        femur_val = (PI - femurAngle)/PI*SERVODIFF + SERVOMIN + femur_offset;
+    }
+
+    if(leg_i == FL || leg_i == FR) {
+        waist_val = hipAngle/PI*SERVODIFF + SERVOMIN + waist_offset;
+    }
+
+    else {
+        waist_val = (PI - hipAngle)/PI*SERVODIFF + SERVOMIN + waist_offset;
+    }
 
     //Serial.println("WaistID: " + String(waist_motor_id) + " " + String(waist_val));
-    //Serial.println("femurID: " + String(femur_motor_id) + " " + String(femur_val));
+//    Serial.println("femurID: " + String(femur_motor_id) + " " + String(femur_val));
     //Serial.println("tibiaID: " + String(tibia_motor_id) + " " + String(tibia_val));
 
     pwm.setPWM(waist_motor_id, 0, waist_val);
@@ -62,17 +87,18 @@ unsigned long start_time;
 int dt = 10;
 
 STATE robot_state = { 
+
     .dt = dt,
     .current_time = 0,
 
-    //robot frame curremt pose   
+    //robot frame current pose   
     .c_x = 0,
     .c_y = 0,
     .c_z = 0,
     .c_R = 0,
     .c_P = 0,
     .c_Y = 0,
-
+    
     .p_x = 0,
     .p_y = 0,
     .p_z = 0,
@@ -91,12 +117,13 @@ void setup() {
     pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates
     //pwm.setPWM(4, 0, 246);
 
-    //Serial.begin(9600, SERIAL_8N1);
+    Serial.begin(115200, SERIAL_8N1);
     #if _ESP32 == 1
     //Serial1.begin(9600, SERIAL_8N1, RX2, TX2);
     #endif
     start_time = millis();
     stand(robot_state);
+    
     
 
 }
@@ -113,10 +140,18 @@ void Leg::SerialParser(String motor_id, int pos, int time) {
 }
 */
 
+void test_IK(STATE state) {
+    leg_FL.compute_IK_XYZ(0, 50, 0);
+    leg_BR.compute_IK_XYZ(0, 50, 0);
+    leg_FR.compute_IK_XYZ(0, 50, 0);
+    leg_BL.compute_IK_XYZ(0, 50, 0);
+}
+
 
 void loop () 
 {
-  
+    delay(1000);
+    test_IK(robot_state);
     currentMillis = millis();
     unsigned long et = currentMillis - start_time;
 
@@ -124,10 +159,9 @@ void loop ()
     //init the robot
     {
         if(et > 5000) {
-            //gait_controller(robot_state);   
+//            gait_controller(robot_state);   
         }
         previousMillis = currentMillis;
-    }
-     
+    } 
 
 }
