@@ -85,11 +85,11 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
     // refference from front left leg
     
     float horr_offset = HOR_OFFSET;
-
+    /*
     if (leg_i == 2 || leg_i == 4) {
         y *= -1;
     }
-
+    */
     //only x,y,z, for now
     float l4_sqrt;
     float l3_x0_sqrt;
@@ -111,9 +111,9 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
     zeta = atan2(LEG_LENGHT * sin(phi), LEG_LENGHT * (1+cos(phi)));
 
     hipAngle = beta + PI/2;
-    femurAngle = 180 - (theta - zeta);
-    tibiaAngle = phi; // old leg design
-    // tibiaAngle = PI - phi; // new leg design
+    femurAngle = PI - (theta - zeta);
+//   tibiaAngle = phi; // old leg design
+    tibiaAngle = PI - phi; // new leg design
 
     motor_arduino(hipAngle, femurAngle, tibiaAngle);
     //motor(hipAngle, femurAngle, tibiaAngle);
@@ -156,7 +156,7 @@ void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
 
 
 //========= Adjust offset HERE =================
-
+/*
 Leg leg_FL( FL,     //leg index
             0,      //waist motor number
             4,      //femur motor number
@@ -188,6 +188,39 @@ Leg leg_BR( BackR,
             -12,
             8,
             12);
+*/
+Leg leg_FL( FL,     //leg index
+            0,      //waist motor number
+            4,      //femur motor number
+            8,      //tibia motor number
+            70,      //waist offset
+            0,     //femur offset
+            10);    //tibia offset
+
+Leg leg_FR( FR,
+            1,
+            5,
+            9,
+            -50,
+            -20,
+            50);
+
+Leg leg_BL( BL,
+            2,
+            6,
+            10,
+            50,
+            20,
+            -70);
+
+Leg leg_BR( BackR,
+            3,
+            7,
+            11,
+            -50,
+            -150,
+            40);
+
 
 /*
     No class
@@ -237,10 +270,10 @@ void gait_controller(STATE &state) {
     //std::cout << state.ticks << std::endl;
     if (state.ticks > N_TICKS) state.ticks = N_TICKS;
 
-    //compute_swing(state);
-    //compute_stance(state);
+    compute_swing(state);
+    compute_stance(state);
 
-    static_trot(state);
+    //static_trot(state);
 
 }
 
@@ -285,6 +318,9 @@ void stand(STATE state) {
     leg_FR.compute_IK_XYZ(0, 0, 0);
     leg_BL.compute_IK_XYZ(0, 0, 0);
 }
+
+
+
 
 void compute_stance(STATE state) {
     /*
