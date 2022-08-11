@@ -9,6 +9,10 @@
 
 #define _ESP32 1 
 
+#if _ESP32 == 1
+#include <Ps3Controller.h>
+#endif
+
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // ========================== new board ============================
@@ -23,6 +27,10 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMAX  3300
 #define SERVODIFF  2700  // SERVOMAX - SERVOMIN
 #define SERVO_FREQ 330
+
+/* =================== PS3 CONTROLLER PARAMS ==================== */
+#define STICKDEADZONE 15
+char* ps3_address = "60:f4:94:34:67:5e";
 
 
 //========== Implement motor function here --- BUT this function will still be called in the compute_IK_XYZ() ===
@@ -109,8 +117,34 @@ STATE robot_state = {
 
 };
 
-void setup() {
+ COMMAND command {
     
+    .v_x = 0,
+    .v_y = 0,
+    .v_z = 0,
+    .roll = 0,
+    .pitch = 0,
+    .yaw = 0
+
+};
+
+#if _ESP32 == 1
+void get_command(COMMAND &command) {
+    command.v_x = Ps3.data.analog.stick.lx;
+    command.v_y = Ps3.data.analog.stick.ly;
+
+    if (command.v_x < STICKDEADZONE && command.v_x > -STICKDEADZONE) {
+        command.v_x = 0;
+    }
+
+    if (command.v_y < STICKDEADZONE && command.v_y > -STICKDEADZONE) {
+        command.v_y = 0;
+    }
+}
+#endif
+
+void setup() {
+       
     //servo shelid init
     pwm.begin();
     pwm.setOscillatorFrequency(27000000);
@@ -120,6 +154,15 @@ void setup() {
     Serial.begin(115200, SERIAL_8N1);
     #if _ESP32 == 1
     //Serial1.begin(9600, SERIAL_8N1, RX2, TX2);
+    Ps3.begin(ps3_address);
+
+    while (!Ps3.isConnected()) {
+        Serial.println("Controller is NOT connected!");
+        delay(500);
+    }
+
+    Serial.println("Controller is connected");
+
     #endif
     start_time = millis();
     stand(robot_state);
@@ -150,16 +193,22 @@ void test_IK(STATE state) {
 
 void loop () 
 {
-    delay(1000);
-    test_IK(robot_state);
+    
     currentMillis = millis();
     unsigned long et = currentMillis - start_time;
 
     if (currentMillis - previousMillis > dt) 
     //init the robot
+    get_command(command);
+    
+    //for testing
+    Serial.println("V_X: " + String(command.v_x));
+    Serial.println("V_Y: " + String(command.v_y));
+
     {
         if(et > 5000) {
-//            gait_controller(robot_state);   
+            //gait_controller(robot_state);
+            test_IK(robot_state);   
         }
         previousMillis = currentMillis;
     } 
