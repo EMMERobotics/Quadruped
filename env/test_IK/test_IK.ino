@@ -9,10 +9,6 @@
 
 #define _ESP32 1 
 
-#if _ESP32 == 1
-#include <Ps3Controller.h>
-#endif
-
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // ========================== new board ============================
@@ -27,10 +23,6 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMAX  3300
 #define SERVODIFF  2700  // SERVOMAX - SERVOMIN
 #define SERVO_FREQ 330
-
-/* =================== PS3 CONTROLLER PARAMS ==================== */
-#define STICKDEADZONE 15
-char* ps3_address = "60:f4:94:34:67:5e";
 
 
 //========== Implement motor function here --- BUT this function will still be called in the compute_IK_XYZ() ===
@@ -80,7 +72,7 @@ void Leg::motor_arduino(float hipAngle, float femurAngle, float tibiaAngle) {
     //Serial.println("WaistID: " + String(waist_motor_id) + " " + String(waist_val));
 //    Serial.println("femurID: " + String(femur_motor_id) + " " + String(femur_val));
     //Serial.println("tibiaID: " + String(tibia_motor_id) + " " + String(tibia_val));
-
+    
     pwm.setPWM(waist_motor_id, 0, waist_val);
     pwm.setPWM(femur_motor_id, 0, femur_val);
     pwm.setPWM(tibia_motor_id, 0, tibia_val);
@@ -117,58 +109,21 @@ STATE robot_state = {
 
 };
 
- COMMAND command {
-    
-    .v_x = 0,
-    .v_y = 0,
-    .v_z = 0,
-    .roll = 0,
-    .pitch = 0,
-    .yaw = 0
-
-};
-
-#if _ESP32 == 1
-void get_command(COMMAND &command) {
-    command.v_x = Ps3.data.analog.stick.lx;
-    command.v_y = Ps3.data.analog.stick.ly;
-
-    if (command.v_x < STICKDEADZONE && command.v_x > -STICKDEADZONE) {
-        command.v_x = 0;
-    }
-
-    if (command.v_y < STICKDEADZONE && command.v_y > -STICKDEADZONE) {
-        command.v_y = 0;
-    }
-}
-#endif
-
 void setup() {
-       
+    
     //servo shelid init
     pwm.begin();
     pwm.setOscillatorFrequency(27000000);
     pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates
     //pwm.setPWM(4, 0, 246);
 
-    Serial.begin(115200, SERIAL_8N1);
+//    Serial.begin(115200, SERIAL_8N1);
     #if _ESP32 == 1
     //Serial1.begin(9600, SERIAL_8N1, RX2, TX2);
-    Ps3.begin(ps3_address);
-
-    while (!Ps3.isConnected()) {
-        Serial.println("Controller is NOT connected!");
-        delay(500);
-    }
-
-    Serial.println("Controller is connected");
-
     #endif
     start_time = millis();
     stand(robot_state);
     
-    
-
 }
 
 /* =========  OLD BOARD, NOT USING ANYMORE ======================= 
@@ -183,36 +138,83 @@ void Leg::SerialParser(String motor_id, int pos, int time) {
 }
 */
 
-void test_IK(STATE state) {
-    leg_FL.compute_IK_XYZ(0, 50, 0);
-    leg_BR.compute_IK_XYZ(0, 50, 0);
-    leg_FR.compute_IK_XYZ(0, 50, 0);
-    leg_BL.compute_IK_XYZ(0, 50, 0);
+void test_IK(STATE state, int x, int y, int z) {
+    leg_FL.compute_IK_XYZ(x, y, z);
+    leg_BR.compute_IK_XYZ(x, y, z);
+    leg_FR.compute_IK_XYZ(x, y, z);
+    leg_BL.compute_IK_XYZ(x, y, z);
 }
 
-
+void test_IK_FL(STATE state, int x, int y, int z) {
+    leg_FL.compute_IK_XYZ(x, y, z);
+    // leg_BR.compute_IK_XYZ(0, 50, 0);
+    // leg_FR.compute_IK_XYZ(0, 50, 0);
+    // leg_BL.compute_IK_XYZ(0, 50, 0);
+}
+int sw = 0;
+int start = 0;
+int d_time = 50;
+int dis = 40;
 void loop () 
 {
+    
+    
+    if (start == 0) {
+      
+        start = 1;
+        for (int y = 0; y < dis; y++) {
+            test_IK(robot_state, 0, y, 0);
+            delay(d_time);
+        }  
+    /*
+        for (int x = 0; x < dis; x++) {
+            test_IK_FL(robot_state, x, dis, 0);
+            delay(d_time);
+        }  */
+    }
+    if (sw == 0) {
+        sw = 1;
+        /*
+        for (int x = -dis; x < dis; x++) {
+            test_IK_FL(robot_state, x, dis, 0);
+            delay(d_time);
+        }  */
+        for (int y = dis; y > -dis; y--) {
+            test_IK(robot_state, dis, y, 0);
+            delay(d_time);
+        }  
+    }
+    if (sw == 1) {
+        // sw = 2;
+        /*
+        for (int y = dis; y > -dis; y--) {
+            test_IK_FL(robot_state, dis, y, 0);
+            delay(d_time);
+        }  */
+        sw = 0;
+        for (int y = -dis; y < dis; y++) {
+            test_IK(robot_state, dis, y, 0);
+            delay(d_time);
+        }  
+    }
+    /*
+    if (sw == 2) {
+        sw = 3;
+        for (int x = dis; x > -dis; x--) {
+            test_IK_FL(robot_state, x, -dis, 0);
+            delay(d_time);
+        }  
+    }
+    if (sw == 3) {
+        sw = 0;
+        for (int y = -dis; y < dis; y++) {
+            test_IK_FL(robot_state, -dis, y, 0);
+            delay(d_time);
+        }  
+    }*/
+
 //    delay(1000);
 //    test_IK(robot_state);
-
-    currentMillis = millis();
-    unsigned long et = currentMillis - start_time;
-
-    if (currentMillis - previousMillis > dt) 
-    //init the robot
-    get_command(command);
     
-    //for testing
-    Serial.println("V_X: " + String(command.v_x));
-    Serial.println("V_Y: " + String(command.v_y));
-
-    {
-        if(et > 5000) {
-            //gait_controller(robot_state);
-            test_IK(robot_state);   
-        }
-        previousMillis = currentMillis;
-    } 
 
 }
