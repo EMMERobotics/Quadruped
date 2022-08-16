@@ -130,8 +130,11 @@ STATE robot_state = {
 
 #if _ESP32 == 1
 void get_command(COMMAND &command) {
-    command.v_x = Ps3.data.analog.stick.lx;
-    command.v_y = Ps3.data.analog.stick.ly;
+    command.v_x = Ps3.data.analog.stick.ly;
+    command.v_y = Ps3.data.analog.stick.lx;
+    command.v_z = Ps3.data.analog.stick.ry;
+
+   
 
     if (command.v_x < STICKDEADZONE && command.v_x > -STICKDEADZONE) {
         command.v_x = 0;
@@ -140,6 +143,11 @@ void get_command(COMMAND &command) {
     if (command.v_y < STICKDEADZONE && command.v_y > -STICKDEADZONE) {
         command.v_y = 0;
     }
+
+    command.v_x = map(command.v_x, -128, 128, -40, 40);
+    command.v_y = map(command.v_y, -128, 128, -40, 40);
+    command.v_z = map(command.v_z, -128, 128, -40, 40);
+
 }
 #endif
 
@@ -183,34 +191,35 @@ void Leg::SerialParser(String motor_id, int pos, int time) {
 }
 */
 
-void test_IK(STATE state) {
-    leg_FL.compute_IK_XYZ(0, 50, 0);
-    leg_BR.compute_IK_XYZ(0, 50, 0);
-    leg_FR.compute_IK_XYZ(0, 50, 0);
-    leg_BL.compute_IK_XYZ(0, 50, 0);
+void test_IK(COMMAND command) {
+    leg_FL.compute_IK_XYZ(command.v_x, command.v_y, command.v_z);
+    leg_BR.compute_IK_XYZ(command.v_x, command.v_y, command.v_z);
+    leg_FR.compute_IK_XYZ(command.v_x, command.v_y, command.v_z);
+    leg_BL.compute_IK_XYZ(command.v_x, command.v_y, command.v_z);
+
+    /*for testing
+      Serial.println("V_X: " + String(command.v_x));
+      Serial.println("V_Y: " + String(command.v_y));
+      Serial.println("V_Z: " + String(command.v_z));
+      */
 }
 
 
 void loop () 
 {
-//    delay(1000);
-//    test_IK(robot_state);
 
     currentMillis = millis();
     unsigned long et = currentMillis - start_time;
 
-    if (currentMillis - previousMillis > dt) 
-    //init the robot
-    get_command(command);
-    
-    //for testing
-    Serial.println("V_X: " + String(command.v_x));
-    Serial.println("V_Y: " + String(command.v_y));
-
+    if (currentMillis - previousMillis > dt)
     {
+      //init the robot
+      get_command(command);
+      test_IK(command);
+      
         if(et > 5000) {
             //gait_controller(robot_state);
-            test_IK(robot_state);   
+            
         }
         previousMillis = currentMillis;
     } 
