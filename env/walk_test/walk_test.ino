@@ -183,11 +183,98 @@ void Leg::SerialParser(String motor_id, int pos, int time) {
 }
 */
 
-void test_IK(STATE state) {
-    leg_FL.compute_IK_XYZ(0, 50, 0);
-    leg_BR.compute_IK_XYZ(0, 50, 0);
-    leg_FR.compute_IK_XYZ(0, 50, 0);
-    leg_BL.compute_IK_XYZ(0, 50, 0);
+void test_IK(int x, int y, int z) {
+    leg_FL.compute_IK_XYZ(x, y, z);
+    leg_BR.compute_IK_XYZ(x, y, z);
+    leg_FR.compute_IK_XYZ(x, y, z);
+    leg_BL.compute_IK_XYZ(x, y, z);
+}
+
+int start = 0;
+int d_time = 50;
+int dis = 40;
+
+void square(int dis) {
+    int sw = 0;
+
+    if (start == 0) {
+        start = 1;
+
+        for (int y = 0; y < dis; y++) {
+            test_IK(robot_state, 0, y, 0);
+            delay(d_time);
+        }  
+
+        for (int x = 0; x < dis; x++) {
+            test_IK_FL(robot_state, x, dis, 0);
+            delay(d_time);
+        }
+    }
+
+    if (sw == 0) {
+        sw = 1;
+
+        for (int y = dis; y > -dis; y--) {
+            test_IK(robot_state, dis, y, 0);
+            delay(d_time);
+        }  
+    }
+
+    if (sw == 1) {
+        sw = 2;
+
+        for (int x = dis; x > -dis; x--) {
+            test_IK_FL(robot_state, x, -dis, 0);
+            delay(d_time);
+        } 
+    }
+
+    if (sw == 2) {
+        sw = 3;
+
+        for (int y = -dis; y < dis; y++) {
+            test_IK(robot_state, dis, y, 0);
+            delay(d_time);
+        }  
+    }
+    
+    if (sw == 3) {
+        sw = 0;
+
+        for (int x = -dis; x < dis; x++) {
+            test_IK_FL(robot_state, x, dis, 0);
+            delay(d_time);
+        }
+    }
+}
+
+void y_coor(int dis) {
+    int sw = 0;
+
+    if (start == 0) {
+        start = 1;
+        for (int y = 0; y < dis; y++) {
+            test_IK(robot_state, 0, y, 0);
+            delay(d_time);
+        }
+    }
+
+    if (sw == 0) {
+        sw = 1;
+        for (int y = dis; y > -dis; y--) {
+            test_IK(robot_state, dis, y, 0);
+            delay(d_time);
+        }  
+    }
+
+    if (sw == 1) {
+        sw = 0;
+        for (int y = -dis; y < dis; y++) {
+            test_IK(robot_state, dis, y, 0);
+            delay(d_time);
+        }  
+    }
+
 }
 
 

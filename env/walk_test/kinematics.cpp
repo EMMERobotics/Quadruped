@@ -6,6 +6,10 @@
 #define STEP_HEIGHT 40
 #define N_TICKS 100 // number of ticks per cycle
 
+#define W_ROBOT 40 // measure
+#define L_ROBOT 40  // measure
+#define THETA_MAX 1.07 // test
+#define R_MAX 155.5635 // test
 //============ INVERSE KINEMATICS PARAMS ====================================
 //link lenght
 #define LEG_LENGHT 110
@@ -416,4 +420,30 @@ void compute_swing(STATE state) {
         leg_BL.compute_IK_XYZ(x, 0, z);
     }
    
+}
+
+void yaw_stance(float theta) {
+    int alpha;
+    int r_l;
+    int beta;
+    int phi;
+    int x;
+    int y;
+    int z;
+    int r;
+
+    alpha = PI/2 - theta/2;
+    r_l = 2 * pow(( pow(W_ROBOT, 2) + pow(L_ROBOT, 2) )/4, 0.5);
+    beta = atan(W_ROBOT/L_ROBOT);
+    phi = PI - beta - alpha;
+    r = theta/THETA_MAX*(R_MAX - VERT_OFFSET) + VERT_OFFSET;
+
+    x = r_l * cos(phi);
+    y = r_l * sin(phi);
+    z = VERT_OFFSET - pow(( pow(r,2) - pow(x,2) - pow(y,2) ), 0.5);
+
+    leg_FL.compute_IK_XYZ(-x, y, z);
+    leg_BR.compute_IK_XYZ(x, y, z);
+    leg_FR.compute_IK_XYZ(-x, -y, z);
+    leg_BL.compute_IK_XYZ(x, -y, z);
 }
