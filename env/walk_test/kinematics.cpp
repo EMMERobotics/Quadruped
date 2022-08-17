@@ -11,10 +11,10 @@
 #define STEP_HEIGHT 40
 #define N_TICKS 100 // number of ticks per cycle
 
-#define W_ROBOT 40 // measure
-#define L_ROBOT 40  // measure
-#define THETA_MAX 1.07 // test
-#define R_MAX 155.5635 // test
+#define W_ROBOT 195 // Width of the robot from the end of the leg to another leg (y direction)
+#define L_ROBOT 283.7  // Length of the robot from the end of the leg to another leg (x direction)
+#define THETA_MAX 1.07 // maximum yaw range (test)
+#define R_MAX 155.5635 // maximum of leg length for yaw stance (test)
 //============ INVERSE KINEMATICS PARAMS ====================================
 //link lenght
 #define LEG_LENGHT 110
@@ -126,7 +126,7 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
     hipAngle = beta + PI/2;
     femurAngle = PI - (theta - zeta);
 
-//   tibiaAngle = phi; // old leg design
+    // tibiaAngle = phi; // old leg design
 
     tibiaAngle = PI - phi; // new leg design
 
@@ -171,7 +171,7 @@ void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
 
 
 //========= Adjust offset HERE =================
-/*
+/* Serial BOARD
 Leg leg_FL( FL,     //leg index
             0,      //waist motor number
             4,      //femur motor number
@@ -272,11 +272,6 @@ Leg leg_BR( BackR,
             -230,
             20);
 
-/*
-    No class
-*/
-
-
 
 void gait_controller(STATE &state) {
     
@@ -367,9 +362,6 @@ void stand(STATE state) {
     leg_BL.compute_IK_XYZ(0, 0, 0);
 }
 
-
-
-
 void compute_stance(STATE state) {
     /*
     GOALS:
@@ -428,7 +420,10 @@ void compute_swing(STATE state) {
    
 }
 
-void yaw_stance(float theta) {
+void yaw_stance(COMMAND command) {
+
+    float theta = command.yaw;
+
     int alpha;
     int r_l;
     int beta;
@@ -439,7 +434,7 @@ void yaw_stance(float theta) {
     int r;
 
     alpha = PI/2 - theta/2;
-    r_l = 2 * pow(( pow(W_ROBOT, 2) + pow(L_ROBOT, 2) )/4, 0.5);
+    r_l = 2 * sqrt(pow(W_ROBOT, 2) + pow(L_ROBOT, 2))/2 * cos(alpha);
     beta = atan(W_ROBOT/L_ROBOT);
     phi = PI - beta - alpha;
     r = theta/THETA_MAX*(R_MAX - VERT_OFFSET) + VERT_OFFSET;
@@ -448,8 +443,8 @@ void yaw_stance(float theta) {
     y = r_l * sin(phi);
     z = VERT_OFFSET - pow(( pow(r,2) - pow(x,2) - pow(y,2) ), 0.5);
 
-    leg_FL.compute_IK_XYZ(-x, y, z);
-    leg_BR.compute_IK_XYZ(x, y, z);
-    leg_FR.compute_IK_XYZ(-x, -y, z);
+    leg_FL.compute_IK_XYZ(x, y, z);
+    leg_FR.compute_IK_XYZ(-x, y, z);
     leg_BL.compute_IK_XYZ(x, -y, z);
+    leg_BR.compute_IK_XYZ(-x, -y, z);
 }
