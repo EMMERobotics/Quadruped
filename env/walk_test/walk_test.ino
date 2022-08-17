@@ -78,7 +78,7 @@ void Leg::motor_arduino(float hipAngle, float femurAngle, float tibiaAngle) {
     }
 
     //Serial.println("WaistID: " + String(waist_motor_id) + " " + String(waist_val));
-//    Serial.println("femurID: " + String(femur_motor_id) + " " + String(femur_val));
+    //Serial.println("femurID: " + String(femur_motor_id) + " " + String(femur_val));
     //Serial.println("tibiaID: " + String(tibia_motor_id) + " " + String(tibia_val));
 
     pwm.setPWM(waist_motor_id, 0, waist_val);
@@ -134,7 +134,7 @@ void get_command(COMMAND &command) {
     command.v_y = Ps3.data.analog.stick.lx;
     command.v_z = Ps3.data.analog.stick.ry;
 
-    command.roll = Ps3.data.analog.stick.rx;
+    command.yaw = Ps3.data.analog.stick.rx;
 
    
 
@@ -193,10 +193,6 @@ void Leg::SerialParser(String motor_id, int pos, int time) {
 }
 */
 
-int start = 0;
-int d_time = 50;
-int dis = 40;
-
 void test_IK(COMMAND command) {
     leg_FL.compute_IK_XYZ(command.v_x, command.v_y, command.v_z);
     leg_BR.compute_IK_XYZ(command.v_x, command.v_y, command.v_z);
@@ -217,10 +213,10 @@ void loop ()
     
     if (currentMillis - previousMillis > dt) {
     
-      //init the robot
-      get_command(command);
-      test_IK(command);
-//      yaw_stance(command);
+        //init the robot
+        get_command(command);
+        test_IK(command);
+        // yaw_stance(command);
       
         if(et > 5000) {
 
