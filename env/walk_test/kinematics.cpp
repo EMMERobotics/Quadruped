@@ -2,7 +2,12 @@
 #define PI 3.14159
 
 //============ GAIT PARAMS =============================================
+//special macros for testing
+#define RATE 4 //Hz
+#define STILLTIME 0.3 //percent of the gait cycle that all 4 legs will be on the ground
+
 #define STEP_SIZE 40
+#define STEP_SIZE_Y 30
 #define STEP_HEIGHT 40
 #define N_TICKS 100 // number of ticks per cycle
 
@@ -271,9 +276,7 @@ Leg leg_BR( BackR,
     No class
 */
 
-//special macros for testing
-#define RATE 1 //Hz
-#define STILLTIME 0.3 //percent of the gait cycle that all 4 legs will be on the ground
+
 
 void gait_controller(STATE &state) {
     
@@ -315,10 +318,10 @@ void gait_controller(STATE &state) {
     //std::cout << state.ticks << std::endl;
     if (state.ticks > N_TICKS) state.ticks = N_TICKS;
 
-//    compute_swing(state);
-//    compute_stance(state);
+    compute_swing(state);
+    compute_stance(state);
 
-    static_trot(state);
+    //static_trot(state);
 
 }
 
@@ -381,16 +384,18 @@ void compute_stance(STATE state) {
     */
    
    float x;
+   float y;
    x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
+   y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100);
 
     if (state.pairs) {
-        leg_FL.compute_IK_XYZ(x, 0, 0);
-        leg_BR.compute_IK_XYZ(x, 0, 0);
+        leg_FL.compute_IK_XYZ(x, y, 0);
+        leg_BR.compute_IK_XYZ(x, y, 0);
     }
 
     else {
-        leg_FR.compute_IK_XYZ(x, 0, 0);
-        leg_BL.compute_IK_XYZ(x, 0, 0);
+        leg_FR.compute_IK_XYZ(x, y, 0);
+        leg_BL.compute_IK_XYZ(x, y, 0);
     }
 }
 
@@ -408,16 +413,17 @@ void compute_swing(STATE state) {
     */
 
    float x = (STEP_SIZE*state.ticks/200) - (STEP_SIZE/4);
+   float y = (STEP_SIZE_Y*state.ticks/200) - (STEP_SIZE_Y/4);
    float z = STEP_HEIGHT*sin(state.ticks*(PI/100));
 
    if (!state.pairs) {
-        leg_FL.compute_IK_XYZ(x, 0, z);
-        leg_BR.compute_IK_XYZ(x, 0, z);
+        leg_FL.compute_IK_XYZ(x, y, z);
+        leg_BR.compute_IK_XYZ(x, y, z);
     }
 
     else {
-        leg_FR.compute_IK_XYZ(x, 0, z);
-        leg_BL.compute_IK_XYZ(x, 0, z);
+        leg_FR.compute_IK_XYZ(x, y, z);
+        leg_BL.compute_IK_XYZ(x, y, z);
     }
    
 }

@@ -10,7 +10,7 @@
 #define _ESP32 1 
 
 #if _ESP32 == 1
-#include <Ps3Controller.h>
+//#include <Ps3Controller.h>
 #endif
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
@@ -28,6 +28,11 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVODIFF  2700  // SERVOMAX - SERVOMIN
 #define SERVO_FREQ 330
 
+#define W_ROBOT 195 // measure
+#define L_ROBOT 283.7  // measure
+#define THETA_MAX 1.07 // test
+#define R_MAX 155.5635 // test
+#define VERT_OFFSET  155.5635
 /* =================== PS3 CONTROLLER PARAMS ==================== */
 #define STICKDEADZONE 15
 char* ps3_address = "60:f4:94:34:67:5e";
@@ -127,7 +132,7 @@ STATE robot_state = {
     .yaw = 0
 
 };
-
+/*
 #if _ESP32 == 1
 void get_command(COMMAND &command) {
     command.v_x = Ps3.data.analog.stick.lx;
@@ -142,7 +147,7 @@ void get_command(COMMAND &command) {
     }
 }
 #endif
-
+*/
 void setup() {
        
     //servo shelid init
@@ -154,6 +159,7 @@ void setup() {
     Serial.begin(115200, SERIAL_8N1);
     #if _ESP32 == 1
     //Serial1.begin(9600, SERIAL_8N1, RX2, TX2);
+    /*
     Ps3.begin(ps3_address);
 
     while (!Ps3.isConnected()) {
@@ -162,7 +168,7 @@ void setup() {
     }
 
     Serial.println("Controller is connected");
-
+    */
     #endif
     start_time = millis();
     stand(robot_state);
@@ -191,113 +197,111 @@ void test_IK(int x, int y, int z) {
 }
 
 int start = 0;
-int d_time = 50;
+int d_time = 1;
 int dis = 40;
 
 void square(int dis) {
-    int sw = 0;
 
     if (start == 0) {
         start = 1;
 
         for (int y = 0; y < dis; y++) {
-            test_IK(robot_state, 0, y, 0);
+            test_IK(0, y, y/4);
             delay(d_time);
         }  
 
         for (int x = 0; x < dis; x++) {
-            test_IK_FL(robot_state, x, dis, 0);
+            test_IK(x, dis, dis/4+x/4);
             delay(d_time);
         }
     }
 
-    if (sw == 0) {
-        sw = 1;
+    for (int y = dis; y > -dis; y--) {
+        test_IK(dis, y, abs(y/2));
+        delay(d_time);
+    }  
 
-        for (int y = dis; y > -dis; y--) {
-            test_IK(robot_state, dis, y, 0);
-            delay(d_time);
-        }  
+    for (int x = dis; x > -dis; x--) {
+        test_IK(x, -dis, abs(x/2));
+        delay(d_time);
+    } 
+
+    for (int y = -dis; y < dis; y++) {
+        test_IK(-dis, y, abs(y/2));
+        delay(d_time);
+    }  
+
+    for (int x = -dis; x < dis; x++) {
+        test_IK(x, dis, abs(x/2));
+        delay(d_time);
     }
 
-    if (sw == 1) {
-        sw = 2;
-
-        for (int x = dis; x > -dis; x--) {
-            test_IK_FL(robot_state, x, -dis, 0);
-            delay(d_time);
-        } 
-    }
-
-    if (sw == 2) {
-        sw = 3;
-
-        for (int y = -dis; y < dis; y++) {
-            test_IK(robot_state, dis, y, 0);
-            delay(d_time);
-        }  
-    }
-    
-    if (sw == 3) {
-        sw = 0;
-
-        for (int x = -dis; x < dis; x++) {
-            test_IK_FL(robot_state, x, dis, 0);
-            delay(d_time);
-        }
-    }
 }
 
 void y_coor(int dis) {
-    int sw = 0;
 
     if (start == 0) {
         start = 1;
         for (int y = 0; y < dis; y++) {
-            test_IK(robot_state, 0, y, 0);
+            test_IK(0, y, 0);
             delay(d_time);
         }
     }
 
-    if (sw == 0) {
-        sw = 1;
-        for (int y = dis; y > -dis; y--) {
-            test_IK(robot_state, dis, y, 0);
-            delay(d_time);
-        }  
-    }
+    for (int y = dis; y > -dis; y--) {
+        test_IK(dis, y, 0);
+        delay(d_time);
+    }  
 
-    if (sw == 1) {
-        sw = 0;
-        for (int y = -dis; y < dis; y++) {
-            test_IK(robot_state, dis, y, 0);
-            delay(d_time);
-        }  
-    }
+    for (int y = -dis; y < dis; y++) {
+        test_IK(dis, y, 0);
+        delay(d_time);
+    }  
 
 }
 
+void yaw() {
+
+    for (int theta = 0; theta < PI/4; theta += 0.1) {
+        yaw_stance(theta);
+        delay(d_time);
+    }  
+
+    for (int theta = PI/4; theta > 0; theta -= 0.1) {
+        yaw_stance(theta);
+        delay(d_time);
+    }
+
+    for (int theta = 0; theta > -PI/4; theta -= 0.1) {
+        yaw_stance(theta);
+        delay(d_time);
+    }
+
+    for (int theta = -PI/4; theta < 0; theta += 0.1) {
+        yaw_stance(theta);
+        delay(d_time);
+    }
+}
 
 void loop () 
 {
-//    delay(1000);
-//    test_IK(robot_state);
+    square(dis);
 
     currentMillis = millis();
     unsigned long et = currentMillis - start_time;
 
     if (currentMillis - previousMillis > dt) 
     //init the robot
-    get_command(command);
+    // get_command(command);
     
     //for testing
-    Serial.println("V_X: " + String(command.v_x));
-    Serial.println("V_Y: " + String(command.v_y));
+    // Serial.println("V_X: " + String(command.v_x));
+    // Serial.println("V_Y: " + String(command.v_y));
 
     {
         if(et > 5000) {
-            //gait_controller(robot_state);
-            test_IK(robot_state);   
+            gait_controller(robot_state);
+//            test_IK();   
         }
         previousMillis = currentMillis;
     } 
