@@ -146,10 +146,12 @@ void get_command(COMMAND &command) {
         command.v_y = 0;
     }
 
-    command.v_x = map(command.v_x, -128, 128, -40, 40);
+    command.v_x = map(command.v_x, -128, 128, 40, -40);
     command.v_y = map(command.v_y, -128, 128, -40, 40);
     command.v_z = map(command.v_z, -128, 128, -40, 40);
     command.yaw = map(command.yaw, -128, 128, -PI/4, PI/4);
+
+    Serial.println(command.v_x);
 
 }
 #endif
@@ -210,13 +212,16 @@ void loop ()
 {
     currentMillis = millis();
     unsigned long et = currentMillis - start_time;
-    
-    if (currentMillis - previousMillis > dt) {
-    
-        //init the robot
-        get_command(command);
-        test_IK(command);
-        // yaw_stance(command);
+
+
+
+    if (currentMillis - previousMillis > dt)
+    {
+      //init the robot
+      get_command(command);
+      test_IK(command);  //<========== !DANGER!  DON'T ENABLE BOTH test_IK() and gait_controller() AT THE SAME TIME
+      //gait_controller(robot_state, command);
+
       
         if(et > 5000) {
 

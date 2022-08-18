@@ -273,7 +273,7 @@ Leg leg_BR( BackR,
             20);
 
 
-void gait_controller(STATE &state) {
+void gait_controller(STATE &state, COMMAND command) {
     
     /* 
     UNFINISHED
@@ -299,24 +299,62 @@ void gait_controller(STATE &state) {
     float incremented_ticks;
     float period_x; //ms for 1 cycle
     float ms_per_ticks;
+    float rate_command;
 
     if (state.ticks == 100) {
         state.ticks = 0;
         state.pairs = !state.pairs;
     }
 
-    //period_x = 1000 * STEP_SIZE/state.c_x;
-    period_x = 1000 * 1/RATE;
+    /*
+    if (command.v_x <= 0) {
+        rate_command = 2;
+    }
+
+    else if (command.v_x > 0) {
+        rate_command = 1;
+    }
+
+    else if (command.v_x > 3) {
+        rate_command = 2;
+    }
+
+    else if (command.v_x > 6) {
+        rate_command = 4;
+    }
+
+    else if (command.v_x > 9 && command.v_x < 12  ) {
+        rate_command = 8;
+    }
+
+    else {
+        rate_command = 2;
+    }
+    
+
+    period_x = 1000 * 1/rate_command;
+    */
+   period_x = 1000*1/RATE;
     ms_per_ticks = period_x / N_TICKS;
     incremented_ticks = ceil(state.dt/ ms_per_ticks); //ceil or floor works better???
     state.ticks += incremented_ticks;
     //std::cout << state.ticks << std::endl;
     if (state.ticks > N_TICKS) state.ticks = N_TICKS;
 
-    compute_swing(state);
-    compute_stance(state);
+   compute_swing(state);
+   compute_stance(state);
+   // static_trot(state);
 
-    //static_trot(state);
+    /*
+    if (command.v_x <= 0 || command.v_x  > 12 ) {
+        static_trot(state);
+    }
+
+    else {
+        compute_swing(state);
+        compute_stance(state);
+    }
+    */
 
 }
 

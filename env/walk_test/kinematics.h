@@ -56,7 +56,7 @@ typedef struct command {
 
 } COMMAND;
 
-void gait_controller(STATE &state);
+void gait_controller(STATE &state, COMMAND command);
 void compute_stance(STATE state);
 void compute_swing(STATE state);
 void static_trot(STATE state);
