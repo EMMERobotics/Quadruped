@@ -458,18 +458,19 @@ void compute_swing(STATE state) {
    
 }
 
-void yaw_stance(COMMAND command) {
+void yaw_stance(COMMAND command, float &a, float &b, float &c) {
 
     float theta = command.yaw;
 
-    int alpha;
-    int r_l;
-    int beta;
-    int phi;
-    int x;
-    int y;
-    int z;
-    int r;
+    float alpha;
+    float r_l;
+    float beta;
+    float phi;
+    float x;
+    float y;
+    float z;
+    float r;
+    
 
     alpha = PI/2 - theta/2;
     r_l = 2 * sqrt(pow(W_ROBOT, 2) + pow(L_ROBOT, 2))/2 * cos(alpha);
@@ -480,7 +481,7 @@ void yaw_stance(COMMAND command) {
     x = r_l * cos(phi);
     y = r_l * sin(phi);
     z = VERT_OFFSET - pow(( pow(r,2) - pow(x,2) - pow(y,2) ), 0.5);
-
+    
     leg_FL.compute_IK_XYZ(x, y, z);
     leg_FR.compute_IK_XYZ(-x, y, z);
     leg_BL.compute_IK_XYZ(x, -y, z);

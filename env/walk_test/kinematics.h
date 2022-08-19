@@ -61,7 +61,7 @@ void compute_stance(STATE state);
 void compute_swing(STATE state);
 void static_trot(STATE state);
 void stand(STATE state);
-void yaw_stance(COMMAND command);
+void yaw_stance(COMMAND command, float &a, float &b, float &c);
 
 class Leg {
     /*

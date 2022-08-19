@@ -146,6 +146,10 @@ void get_command(COMMAND &command) {
         command.v_y = 0;
     }
 
+    if (command.yaw < STICKDEADZONE && command.yaw > -STICKDEADZONE) {
+        command.yaw = 0;
+    }
+
     command.v_x = map(command.v_x, -128, 128, 40, -40);
     command.v_y = map(command.v_y, -128, 128, -40, 40);
     command.v_z = map(command.v_z, -128, 128, -40, 40);
@@ -155,6 +159,10 @@ void get_command(COMMAND &command) {
 
 }
 #endif
+
+float a = 0;
+float b = 0;
+float c = 0;
 
 void setup() {
        
@@ -219,9 +227,13 @@ void loop ()
     {
       //init the robot
       get_command(command);
-      test_IK(command);  //<========== !DANGER!  DON'T ENABLE BOTH test_IK() and gait_controller() AT THE SAME TIME
+//      test_IK(command);  //<========== !DANGER!  DON'T ENABLE BOTH test_IK() and gait_controller() AT THE SAME TIME
       //gait_controller(robot_state, command);
-
+      yaw_stance(command, a, b, c);
+      Serial.println(x);
+      Serial.println(y);
+      Serial.println(z);
+      Serial.println("+++++++++++++++++");
       
         if(et > 5000) {
 
