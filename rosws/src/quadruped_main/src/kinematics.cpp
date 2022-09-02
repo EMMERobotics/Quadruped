@@ -1,4 +1,4 @@
-#include "kinematics.h"
+#include "kinematics/kinematics.h"
 #define PI 3.14159
 
 //============ GAIT PARAMS =============================================
