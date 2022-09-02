@@ -70,7 +70,7 @@ class Leg {
         - motor interface
     */
    
-   leg_index leg_i;
+   
    
    float current_x;
    float current_y;
@@ -96,6 +96,7 @@ class Leg {
 
 public:
     
+    leg_index leg_i;
     
     //#if _MCUENABLE == 1
     Leg(  leg_index _leg_i, 
