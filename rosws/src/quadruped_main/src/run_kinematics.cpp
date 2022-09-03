@@ -63,6 +63,7 @@ int main(int argc, char **argv)
     //GET_COMMAND()
 
     gait_controller(robot_state);
+    
     parse_motor_command(motor_comm_pub, leg_FL);
     parse_motor_command(motor_comm_pub, leg_FR);
     parse_motor_command(motor_comm_pub, leg_BL);

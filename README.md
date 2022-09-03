@@ -10,7 +10,7 @@
 Ubuntu 20.04 LTS can be flashed to the SD Card with Raspberry Pi Imager.
 
 ### ROS
-Install ROS **NOETIC** as you normally do on desktop.
+Install ROS **NOETIC** headless (base version) as you normally do on desktop.
 
 ### Adafruit PCA9685 Servo Driver
 *If getting an error message about* ***"board" not found or "board" has no attribute*** -> [Circuit Python FAQ](https://learn.adafruit.com/circuitpython-on-raspberrypi-linux/faq-troubleshooting)
