@@ -41,17 +41,6 @@ min_pulse = 750
 max_pulse = 2950
 
 servo0 = servo.Servo(pca.channels[0], min_pulse, max_pulse)
-servo1 = servo.Servo(pca.channels[1], min_pulse, max_pulse)
-servo2 = servo.Servo(pca.channels[2], min_pulse, max_pulse)
-servo3 = servo.Servo(pca.channels[3], min_pulse, max_pulse)
-servo4 = servo.Servo(pca.channels[4], min_pulse, max_pulse)
-servo5 = servo.Servo(pca.channels[5], min_pulse, max_pulse)
-servo6 = servo.Servo(pca.channels[6], min_pulse, max_pulse)
-servo7 = servo.Servo(pca.channels[7], min_pulse, max_pulse)
-servo8 = servo.Servo(pca.channels[8], min_pulse, max_pulse)
-servo9 = servo.Servo(pca.channels[9], min_pulse, max_pulse)
-servo10 = servo.Servo(pca.channels[10], min_pulse, max_pulse)
-servo11 = servo.Servo(pca.channels[11], min_pulse, max_pulse)
 
 
 # We sleep in the loops to give the servo time to move into position.

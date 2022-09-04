@@ -10,8 +10,10 @@ from adafruit_pca9685 import PCA9685
 from math import pi
 
 # servo param
-min_pulse = 750
-max_pulse = 2950
+min_range = 750
+max_range = 2950
+
+i2c = busio.I2C(SCL, SDA)
 
 # Create a simple PCA9685 class instance.
 pca = PCA9685(i2c)
@@ -36,6 +38,7 @@ def translate(value, leftMin, leftMax, rightMin, rightMax):
     # Convert the 0-1 range into a value in the right range.
     return rightMin + (valueScaled * rightSpan)
 
+#servo_test = servo.Servo(pca.channels[12], min_pulse, max_pulse)
 
 class Leg:
     def __init__(self, leg_i, hip_servo, femur_servo, tibia_servo, hip_offset, femur_offset, tibia_offset):
@@ -44,9 +47,9 @@ class Leg:
         self.femur_offset = femur_offset
         self.tibia_offset = tibia_offset
         #init servo object uniqe to each leg object
-        self.hip_servo = servo.Servo(pca.channels[hip_servo], min_pulse, max_pulse)
-        self.femur_servo = servo.Servo(pca.channels[femur_servo], min_pulse, max_pulse)
-        self.tibia_servo = servo.Servo(pca.channels[tibia_servo], min_pulse, max_pulse)
+        self.hip_servo = servo.Servo(pca.channels[hip_servo], min_pulse=min_range, max_pulse=max_range)
+        self.femur_servo = servo.Servo(pca.channels[femur_servo], min_pulse=min_range, max_pulse=max_range)
+        self.tibia_servo = servo.Servo(pca.channels[tibia_servo], min_pulse=min_range, max_pulse=max_range)
 
     def publish_command(self, hipAngle, femurAngle, tibiaAngle):
         hipCommand = translate(hipAngle, 0, pi, 0, 180)
@@ -66,8 +69,8 @@ class Leg:
 
 
 #create leg object for each legs
-leg_FR = Leg(0, 0, 1, 2, 0, 0, 0) #check the offset unit -- offset will be directly added to the command
-leg_FL = Leg(1, 3, 4, 5, 0, 0, 0)
+leg_FL = Leg(0, 0, 1, 2, 0, 0, 0) #check the offset unit -- offset will be directly added to the command
+leg_FR = Leg(1, 3, 4, 5, 0, 0, 0)
 leg_BL = Leg(2, 6, 7, 8, 0, 0, 0)
 leg_BR = Leg(3, 9, 10, 11, 0, 0, 0)
 
