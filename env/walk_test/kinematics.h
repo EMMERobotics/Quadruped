@@ -56,12 +56,12 @@ typedef struct command {
 
 } COMMAND;
 
-void gait_controller(STATE &state);
+void gait_controller(STATE &state, COMMAND command);
 void compute_stance(STATE state);
 void compute_swing(STATE state);
 void static_trot(STATE state);
 void stand(STATE state);
-void yaw_stance(float theta);
+void yaw_stance(COMMAND command, float &a, float &b, float &c);
 
 class Leg {
     /*
