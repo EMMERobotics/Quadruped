@@ -2,10 +2,19 @@
 #define PI 3.14159
 
 //============ GAIT PARAMS =============================================
+//special macros for testing
+#define RATE 4 //Hz
+#define STILLTIME 0.3 //percent of the gait cycle that all 4 legs will be on the ground
+
 #define STEP_SIZE 40
+#define STEP_SIZE_Y 30
 #define STEP_HEIGHT 40
 #define N_TICKS 100 // number of ticks per cycle
 
+#define W_ROBOT 40 // measure
+#define L_ROBOT 40  // measure
+#define THETA_MAX 1.07 // test
+#define R_MAX 155.5635 // test
 //============ INVERSE KINEMATICS PARAMS ====================================
 //link lenght
 #define LEG_LENGHT 110
@@ -85,11 +94,12 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
     // refference from front left leg
     
     float horr_offset = HOR_OFFSET;
-    /*
-    if (leg_i == 2 || leg_i == 4) {
+    float leg_lenght = LEG_LENGHT;
+
+    if (leg_i == 1 || leg_i == 3) {
         y *= -1;
     }
-    */
+
     //only x,y,z, for now
     float l4_sqrt;
     float l3_x0_sqrt;
@@ -101,15 +111,18 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
     float zeta;
 
     h = VERT_OFFSET - z;
-    l4_sqrt = pow((h), 2) + pow(y +  HOR_OFFSET, 2);
-    l3_x0_sqrt = l4_sqrt - pow(HOR_OFFSET, 2);
+    l4_sqrt = pow((h), 2) + pow(y +  horr_offset, 2);
+    l3_x0_sqrt = l4_sqrt - pow(horr_offset, 2);
     l3_sqrt = l3_x0_sqrt + pow(x,2);
 
-    beta = asin(sqrt(l3_x0_sqrt/l4_sqrt)) - atan2(h, y +  HOR_OFFSET);
-    phi = acos((l3_sqrt / (2*pow(LEG_LENGHT, 2))) - 1);
+    beta = asin(sqrt(l3_x0_sqrt/l4_sqrt)) - atan2(h, y +  horr_offset);
+    phi = acos((l3_sqrt / (2*pow(leg_lenght, 2))) - 1);
     theta = atan2(x, h) + PI/2;
-    zeta = atan2(LEG_LENGHT * sin(phi), LEG_LENGHT * (1+cos(phi)));
+    zeta = atan2(leg_lenght * sin(phi), leg_lenght * (1+cos(phi)));
 
+    if (leg_i == 1 || leg_i == 3) {
+        beta *= -1;
+    }
     hipAngle = beta + PI/2;
     femurAngle = PI - (theta - zeta);
 
@@ -191,6 +204,9 @@ Leg leg_BR( BackR,
             8,
             12);
 */
+
+// spare board
+/*
 Leg leg_FL( FL,     //leg index
             0,      //waist motor number
             4,      //femur motor number
@@ -222,15 +238,45 @@ Leg leg_BR( BackR,
             -50,
             -150,
             40);
+*/
 
+Leg leg_FL( FL,     //leg index
+            0,      //waist motor number
+            4,      //femur motor number
+            8,      //tibia motor number
+            0,      //waist offset
+            -100,     //femur offset
+            -100);    //tibia offset
+
+Leg leg_FR( FR,
+            1,
+            5,
+            9,
+            -80,
+            -100,
+            -10);
+
+Leg leg_BL( BL,
+            2,
+            6,
+            10,
+            -40,
+            -60,
+            -190);
+
+Leg leg_BR( BackR,
+            3,
+            7,
+            11,
+            -100,
+            -230,
+            20);
 
 /*
     No class
 */
 
-//special macros for testing
-#define RATE 8 //Hz
-#define STILLTIME 0.3 //percent of the gait cycle that all 4 legs will be on the ground
+
 
 void gait_controller(STATE &state) {
     
@@ -338,16 +384,18 @@ void compute_stance(STATE state) {
     */
    
    float x;
+   float y;
    x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
+   y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100);
 
     if (state.pairs) {
-        leg_FL.compute_IK_XYZ(x, 0, 0);
-        leg_BR.compute_IK_XYZ(x, 0, 0);
+        leg_FL.compute_IK_XYZ(x, y, 0);
+        leg_BR.compute_IK_XYZ(x, y, 0);
     }
 
     else {
-        leg_FR.compute_IK_XYZ(x, 0, 0);
-        leg_BL.compute_IK_XYZ(x, 0, 0);
+        leg_FR.compute_IK_XYZ(x, y, 0);
+        leg_BL.compute_IK_XYZ(x, y, 0);
     }
 }
 
@@ -365,16 +413,43 @@ void compute_swing(STATE state) {
     */
 
    float x = (STEP_SIZE*state.ticks/200) - (STEP_SIZE/4);
+   float y = (STEP_SIZE_Y*state.ticks/200) - (STEP_SIZE_Y/4);
    float z = STEP_HEIGHT*sin(state.ticks*(PI/100));
 
    if (!state.pairs) {
-        leg_FL.compute_IK_XYZ(x, 0, z);
-        leg_BR.compute_IK_XYZ(x, 0, z);
+        leg_FL.compute_IK_XYZ(x, y, z);
+        leg_BR.compute_IK_XYZ(x, y, z);
     }
 
     else {
-        leg_FR.compute_IK_XYZ(x, 0, z);
-        leg_BL.compute_IK_XYZ(x, 0, z);
+        leg_FR.compute_IK_XYZ(x, y, z);
+        leg_BL.compute_IK_XYZ(x, y, z);
     }
    
+}
+
+void yaw_stance(float theta) {
+    int alpha;
+    int r_l;
+    int beta;
+    int phi;
+    int x;
+    int y;
+    int z;
+    int r;
+
+    alpha = PI/2 - theta/2;
+    r_l = 2 * pow(( pow(W_ROBOT, 2) + pow(L_ROBOT, 2) )/4, 0.5);
+    beta = atan(W_ROBOT/L_ROBOT);
+    phi = PI - beta - alpha;
+    r = theta/THETA_MAX*(R_MAX - VERT_OFFSET) + VERT_OFFSET;
+
+    x = r_l * cos(phi);
+    y = r_l * sin(phi);
+    z = VERT_OFFSET - pow(( pow(r,2) - pow(x,2) - pow(y,2) ), 0.5);
+
+    leg_FL.compute_IK_XYZ(-x, y, z);
+    leg_BR.compute_IK_XYZ(x, y, z);
+    leg_FR.compute_IK_XYZ(-x, -y, z);
+    leg_BL.compute_IK_XYZ(x, -y, z);
 }
