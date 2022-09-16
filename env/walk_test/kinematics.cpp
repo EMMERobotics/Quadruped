@@ -2,10 +2,19 @@
 #define PI 3.14159
 
 //============ GAIT PARAMS =============================================
+//special macros for testing
+#define RATE 4 //Hz
+#define STILLTIME 0.3 //percent of the gait cycle that all 4 legs will be on the ground
+
 #define STEP_SIZE 40
+#define STEP_SIZE_Y 30
 #define STEP_HEIGHT 40
 #define N_TICKS 100 // number of ticks per cycle
 
+#define W_ROBOT 195 // Width of the robot from the end of the leg to another leg (y direction)
+#define L_ROBOT 283.7  // Length of the robot from the end of the leg to another leg (x direction)
+#define THETA_MAX 1.07 // maximum yaw range (test)
+#define R_MAX 155.5635 // maximum of leg length for yaw stance (test)
 //============ INVERSE KINEMATICS PARAMS ====================================
 //link lenght
 #define LEG_LENGHT 110
@@ -85,11 +94,12 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
     // refference from front left leg
     
     float horr_offset = HOR_OFFSET;
-    /*
-    if (leg_i == 2 || leg_i == 4) {
+    float leg_lenght = LEG_LENGHT;
+
+    if (leg_i == 1 || leg_i == 3) {
         y *= -1;
     }
-    */
+
     //only x,y,z, for now
     float l4_sqrt;
     float l3_x0_sqrt;
@@ -101,19 +111,22 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
     float zeta;
 
     h = VERT_OFFSET - z;
-    l4_sqrt = pow((h), 2) + pow(y +  HOR_OFFSET, 2);
-    l3_x0_sqrt = l4_sqrt - pow(HOR_OFFSET, 2);
+    l4_sqrt = pow((h), 2) + pow(y +  horr_offset, 2);
+    l3_x0_sqrt = l4_sqrt - pow(horr_offset, 2);
     l3_sqrt = l3_x0_sqrt + pow(x,2);
 
-    beta = asin(sqrt(l3_x0_sqrt/l4_sqrt)) - atan2(h, y +  HOR_OFFSET);
-    phi = acos((l3_sqrt / (2*pow(LEG_LENGHT, 2))) - 1);
+    beta = asin(sqrt(l3_x0_sqrt/l4_sqrt)) - atan2(h, y +  horr_offset);
+    phi = acos((l3_sqrt / (2*pow(leg_lenght, 2))) - 1);
     theta = atan2(x, h) + PI/2;
-    zeta = atan2(LEG_LENGHT * sin(phi), LEG_LENGHT * (1+cos(phi)));
+    zeta = atan2(leg_lenght * sin(phi), leg_lenght * (1+cos(phi)));
 
+    if (leg_i == 1 || leg_i == 3) {
+        beta *= -1;
+    }
     hipAngle = beta + PI/2;
     femurAngle = PI - (theta - zeta);
 
-//   tibiaAngle = phi; // old leg design
+    // tibiaAngle = phi; // old leg design
 
     tibiaAngle = PI - phi; // new leg design
 
@@ -158,7 +171,7 @@ void Leg::motor(float hipAngle, float femurAngle, float tibiaAngle) {
 
 
 //========= Adjust offset HERE =================
-/*
+/* Serial BOARD
 Leg leg_FL( FL,     //leg index
             0,      //waist motor number
             4,      //femur motor number
@@ -191,6 +204,9 @@ Leg leg_BR( BackR,
             8,
             12);
 */
+
+// spare board
+/*
 Leg leg_FL( FL,     //leg index
             0,      //waist motor number
             4,      //femur motor number
@@ -222,17 +238,42 @@ Leg leg_BR( BackR,
             -50,
             -150,
             40);
-
-
-/*
-    No class
 */
 
-//special macros for testing
-#define RATE 8 //Hz
-#define STILLTIME 0.3 //percent of the gait cycle that all 4 legs will be on the ground
+Leg leg_FL( FL,     //leg index
+            0,      //waist motor number
+            4,      //femur motor number
+            8,      //tibia motor number
+            0,      //waist offset
+            -100,     //femur offset
+            -100);    //tibia offset
 
-void gait_controller(STATE &state) {
+Leg leg_FR( FR,
+            1,
+            5,
+            9,
+            -80,
+            -100,
+            -10);
+
+Leg leg_BL( BL,
+            2,
+            6,
+            10,
+            -40,
+            -60,
+            -190);
+
+Leg leg_BR( BackR,
+            3,
+            7,
+            11,
+            -100,
+            -230,
+            20);
+
+
+void gait_controller(STATE &state, COMMAND command) {
     
     /* 
     UNFINISHED
@@ -258,24 +299,62 @@ void gait_controller(STATE &state) {
     float incremented_ticks;
     float period_x; //ms for 1 cycle
     float ms_per_ticks;
+    float rate_command;
 
     if (state.ticks == 100) {
         state.ticks = 0;
         state.pairs = !state.pairs;
     }
 
-    //period_x = 1000 * STEP_SIZE/state.c_x;
-    period_x = 1000 * 1/RATE;
+    /*
+    if (command.v_x <= 0) {
+        rate_command = 2;
+    }
+
+    else if (command.v_x > 0) {
+        rate_command = 1;
+    }
+
+    else if (command.v_x > 3) {
+        rate_command = 2;
+    }
+
+    else if (command.v_x > 6) {
+        rate_command = 4;
+    }
+
+    else if (command.v_x > 9 && command.v_x < 12  ) {
+        rate_command = 8;
+    }
+
+    else {
+        rate_command = 2;
+    }
+    
+
+    period_x = 1000 * 1/rate_command;
+    */
+   period_x = 1000*1/RATE;
     ms_per_ticks = period_x / N_TICKS;
     incremented_ticks = ceil(state.dt/ ms_per_ticks); //ceil or floor works better???
     state.ticks += incremented_ticks;
     //std::cout << state.ticks << std::endl;
     if (state.ticks > N_TICKS) state.ticks = N_TICKS;
 
-    compute_swing(state);
-    compute_stance(state);
+   compute_swing(state);
+   compute_stance(state);
+   // static_trot(state);
 
-    //static_trot(state);
+    /*
+    if (command.v_x <= 0 || command.v_x  > 12 ) {
+        static_trot(state);
+    }
+
+    else {
+        compute_swing(state);
+        compute_stance(state);
+    }
+    */
 
 }
 
@@ -321,9 +400,6 @@ void stand(STATE state) {
     leg_BL.compute_IK_XYZ(0, 0, 0);
 }
 
-
-
-
 void compute_stance(STATE state) {
     /*
     GOALS:
@@ -338,16 +414,18 @@ void compute_stance(STATE state) {
     */
    
    float x;
+   float y;
    x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
+   y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100);
 
     if (state.pairs) {
-        leg_FL.compute_IK_XYZ(x, 0, 0);
-        leg_BR.compute_IK_XYZ(x, 0, 0);
+        leg_FL.compute_IK_XYZ(x, y, 0);
+        leg_BR.compute_IK_XYZ(x, y, 0);
     }
 
     else {
-        leg_FR.compute_IK_XYZ(x, 0, 0);
-        leg_BL.compute_IK_XYZ(x, 0, 0);
+        leg_FR.compute_IK_XYZ(x, y, 0);
+        leg_BL.compute_IK_XYZ(x, y, 0);
     }
 }
 
@@ -365,16 +443,47 @@ void compute_swing(STATE state) {
     */
 
    float x = (STEP_SIZE*state.ticks/200) - (STEP_SIZE/4);
+   float y = (STEP_SIZE_Y*state.ticks/200) - (STEP_SIZE_Y/4);
    float z = STEP_HEIGHT*sin(state.ticks*(PI/100));
 
    if (!state.pairs) {
-        leg_FL.compute_IK_XYZ(x, 0, z);
-        leg_BR.compute_IK_XYZ(x, 0, z);
+        leg_FL.compute_IK_XYZ(x, y, z);
+        leg_BR.compute_IK_XYZ(x, y, z);
     }
 
     else {
-        leg_FR.compute_IK_XYZ(x, 0, z);
-        leg_BL.compute_IK_XYZ(x, 0, z);
+        leg_FR.compute_IK_XYZ(x, y, z);
+        leg_BL.compute_IK_XYZ(x, y, z);
     }
    
+}
+
+void yaw_stance(COMMAND command, float &a, float &b, float &c) {
+
+    float theta = command.yaw;
+
+    float alpha;
+    float r_l;
+    float beta;
+    float phi;
+    float x;
+    float y;
+    float z;
+    float r;
+    
+
+    alpha = PI/2 - theta/2;
+    r_l = 2 * sqrt(pow(W_ROBOT, 2) + pow(L_ROBOT, 2))/2 * cos(alpha);
+    beta = atan(W_ROBOT/L_ROBOT);
+    phi = PI - beta - alpha;
+    r = theta/THETA_MAX*(R_MAX - VERT_OFFSET) + VERT_OFFSET;
+
+    x = r_l * cos(phi);
+    y = r_l * sin(phi);
+    z = VERT_OFFSET - pow(( pow(r,2) - pow(x,2) - pow(y,2) ), 0.5);
+    
+    leg_FL.compute_IK_XYZ(x, y, z);
+    leg_FR.compute_IK_XYZ(-x, y, z);
+    leg_BL.compute_IK_XYZ(x, -y, z);
+    leg_BR.compute_IK_XYZ(-x, -y, z);
 }
