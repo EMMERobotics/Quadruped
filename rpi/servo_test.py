@@ -37,32 +37,44 @@ pca.frequency = 50
 # range, but the default is to use 180 degrees. You can specify the expected range if you wish:
 # servo7 = servo.Servo(pca.channels[7], actuation_range=135)
 
-min_pulse = 750
-max_pulse = 2950
+minrange = 550
+maxrange = 2750
 
-servo0 = servo.Servo(pca.channels[0], min_pulse, max_pulse)
+servo0 = servo.Servo(pca.channels[0], min_pulse=minrange, max_pulse=maxrange )
+servo1 = servo.Servo(pca.channels[1], min_pulse=minrange, max_pulse=maxrange )
+servo2 = servo.Servo(pca.channels[2], min_pulse=minrange, max_pulse=maxrange )
+servo3 = servo.Servo(pca.channels[3], min_pulse=minrange, max_pulse=maxrange )
+servo4 = servo.Servo(pca.channels[4], min_pulse=minrange, max_pulse=maxrange )
+servo5 = servo.Servo(pca.channels[5], min_pulse=minrange, max_pulse=maxrange )
+servo6 = servo.Servo(pca.channels[6], min_pulse=minrange, max_pulse=maxrange )
+servo7 = servo.Servo(pca.channels[7], min_pulse=minrange, max_pulse=maxrange )
+servo8 = servo.Servo(pca.channels[8], min_pulse=minrange, max_pulse=maxrange )
+servo9 = servo.Servo(pca.channels[9], min_pulse=minrange, max_pulse=maxrange )
+servo10 = servo.Servo(pca.channels[10], min_pulse=minrange, max_pulse=maxrange )
+servo11 = servo.Servo(pca.channels[11], min_pulse=minrange, max_pulse=maxrange )
 
 
 # We sleep in the loops to give the servo time to move into position.
-sleep_time = 0.01
+servo0.angle = 87
+servo1.angle = 92
+servo2.angle = 87
+servo3.angle = 96
+servo4.angle = 132
+servo5.angle = 45
+servo6.angle = 139
+servo7.angle = 40
+servo8.angle = 96
+servo9.angle = 85
+servo10.angle = 80
+servo11.angle = 85
 
-try:
-    for i in range(180):
-        servo7.angle = i       
-        time.sleep(sleep_time)
-
-    for i in range(180):
-        servo7.angle = 180 - i
-        time.sleep(sleep_time)
-
-except KeyboardInterrupt:
-    print("Exiting")
-
+"""
         # You can also specify the movement fractionally.
 #fraction = 0.0
 #while fraction < 1.0:
 #    servo7.fraction = fraction
 #    fraction += 0.01
 #    time.sleep(0.03)
-
+"""
 pca.deinit()
+

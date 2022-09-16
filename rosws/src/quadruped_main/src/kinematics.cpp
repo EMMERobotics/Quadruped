@@ -8,8 +8,8 @@
 
 //============ INVERSE KINEMATICS PARAMS ====================================
 //link lenght
-#define LEG_LENGHT 110
-#define VERT_OFFSET  155.5635 //must be adjustable (default 45 degree angle between links)
+#define LEG_LENGHT 115
+#define VERT_OFFSET  162.6345 //must be adjustable (default 45 degree angle between links)
 #define HOR_OFFSET  20 //NOT ACTUAL VALUE!!!   <=================================
 //motor offset 
 #define HIP_ANGLE_OFFSET 1.5708 //90 degree
@@ -227,7 +227,7 @@ Leg leg_BR( BackR,
 */
 
 //special macros for testing
-#define RATE 8 //Hz
+#define RATE 4 //Hz
 #define STILLTIME 0.3 //percent of the gait cycle that all 4 legs will be on the ground
 
 void gait_controller(STATE &state) {
@@ -270,10 +270,10 @@ void gait_controller(STATE &state) {
     //std::cout << state.ticks << std::endl;
     if (state.ticks > N_TICKS) state.ticks = N_TICKS;
 
-    compute_swing(state);
-    compute_stance(state);
+    //compute_swing(state);
+    //compute_stance(state);
 
-    //static_trot(state);
+    static_trot(state);
 
 }
 

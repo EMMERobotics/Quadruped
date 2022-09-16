@@ -10,8 +10,8 @@ from adafruit_pca9685 import PCA9685
 from math import pi
 
 # servo param
-min_range = 750
-max_range = 2950
+min_range = 550
+max_range = 2750
 
 i2c = busio.I2C(SCL, SDA)
 
@@ -69,10 +69,10 @@ class Leg:
 
 
 #create leg object for each legs
-leg_FL = Leg(0, 0, 1, 2, 0, 0, 0) #check the offset unit -- offset will be directly added to the command
-leg_FR = Leg(1, 3, 4, 5, 0, 0, 0)
-leg_BL = Leg(2, 6, 7, 8, 0, 0, 0)
-leg_BR = Leg(3, 9, 10, 11, 0, 0, 0)
+leg_FL = Leg(0, 0,  4,  8, -3, -3,  6) #check the offset unit -- offset will be directly added to the command
+leg_FR = Leg(1, 1,  5,  9,  2,  0, -5)
+leg_BL = Leg(2, 2,  6, 10, -3,  4, -10)
+leg_BR = Leg(3, 3,  7, 11,  6, -5, -5)
 
 
 def callback(data):
