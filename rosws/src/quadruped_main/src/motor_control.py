@@ -85,11 +85,11 @@ def callback(data):
     if leg_index == 0:
         leg_FL.publish_command(hipAngle, femurAngle, tibiaAngle)
     elif leg_index == 1:
-        leg_FR.publish_command(hipAngle, femurAngle, tibiaAngle)
+        leg_FR.publish_command(hipAngle, pi-femurAngle, pi-tibiaAngle)
     elif leg_index == 2:
-        leg_BL.publish_command(hipAngle, femurAngle, tibiaAngle)
+        leg_BL.publish_command(pi-hipAngle, femurAngle, tibiaAngle)
     elif leg_index == 3:
-        leg_BR.publish_command(hipAngle, femurAngle, tibiaAngle)
+        leg_BR.publish_command(pi-hipAngle, pi-femurAngle, pi-tibiaAngle)
     else:
         rospy.loginfo("MP ERROR: leg_index out of range")
     
