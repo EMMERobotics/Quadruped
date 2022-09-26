@@ -7,7 +7,13 @@
 #define RX2 16
 #define TX2 17
 
+#define PI 3.14159
+
 #define _ESP32 1 
+
+#if _ESP32 == 1
+#include <Ps3Controller.h>
+#endif
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
@@ -23,7 +29,9 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMAX  3300
 #define SERVODIFF  2700  // SERVOMAX - SERVOMIN
 #define SERVO_FREQ 330
-
+/* =================== PS3 CONTROLLER PARAMS ==================== */
+#define STICKDEADZONE 15
+char* ps3_address = "60:f4:94:34:67:5e";
 
 //========== Implement motor function here --- BUT this function will still be called in the compute_IK_XYZ() ===
 void Leg::motor_arduino(float hipAngle, float femurAngle, float tibiaAngle) {
@@ -70,7 +78,7 @@ void Leg::motor_arduino(float hipAngle, float femurAngle, float tibiaAngle) {
     }
 
     //Serial.println("WaistID: " + String(waist_motor_id) + " " + String(waist_val));
-//    Serial.println("femurID: " + String(femur_motor_id) + " " + String(femur_val));
+    //Serial.println("femurID: " + String(femur_motor_id) + " " + String(femur_val));
     //Serial.println("tibiaID: " + String(tibia_motor_id) + " " + String(tibia_val));
 
     pwm.setPWM(waist_motor_id, 0, waist_val);
@@ -109,8 +117,55 @@ STATE robot_state = {
 
 };
 
-void setup() {
+ COMMAND command {
     
+    .v_x = 0,
+    .v_y = 0,
+    .v_z = 0,
+    .roll = 0,
+    .pitch = 0,
+    .yaw = 0
+
+};
+
+#if _ESP32 == 1
+void get_command(COMMAND &command) {
+    command.v_x = Ps3.data.analog.stick.ly;
+    command.v_y = Ps3.data.analog.stick.lx;
+    command.v_z = Ps3.data.analog.stick.ry;
+
+    command.yaw = Ps3.data.analog.stick.rx;
+
+   
+
+    if (command.v_x < STICKDEADZONE && command.v_x > -STICKDEADZONE) {
+        command.v_x = 0;
+    }
+
+    if (command.v_y < STICKDEADZONE && command.v_y > -STICKDEADZONE) {
+        command.v_y = 0;
+    }
+
+    if (command.yaw < STICKDEADZONE && command.yaw > -STICKDEADZONE) {
+        command.yaw = 0;
+    }
+
+    command.v_x = map(command.v_x, -128, 128, 40, -40);
+    command.v_y = map(command.v_y, -128, 128, -40, 40);
+    command.v_z = map(command.v_z, -128, 128, -40, 40);
+    command.yaw = map(command.yaw, -128, 128, -PI/4, PI/4);
+
+    Serial.println(command.v_x);
+
+}
+#endif
+
+float a = 0;
+float b = 0;
+float c = 0;
+
+void setup() {
+       
     //servo shelid init
     pwm.begin();
     pwm.setOscillatorFrequency(27000000);
@@ -120,11 +175,19 @@ void setup() {
     Serial.begin(115200, SERIAL_8N1);
     #if _ESP32 == 1
     //Serial1.begin(9600, SERIAL_8N1, RX2, TX2);
+
+    Ps3.begin(ps3_address);
+
+    while (!Ps3.isConnected()) {
+        Serial.println("Controller is NOT connected!");
+        delay(500);
+    }
+
+    Serial.println("Controller is connected");
+
     #endif
     start_time = millis();
     stand(robot_state);
-    
-    
 
 }
 
@@ -140,26 +203,42 @@ void Leg::SerialParser(String motor_id, int pos, int time) {
 }
 */
 
-void test_IK(STATE state) {
-    leg_FL.compute_IK_XYZ(0, 50, 0);
-    leg_BR.compute_IK_XYZ(0, 50, 0);
-    leg_FR.compute_IK_XYZ(0, 50, 0);
-    leg_BL.compute_IK_XYZ(0, 50, 0);
-}
+void test_IK(COMMAND command) {
+    leg_FL.compute_IK_XYZ(command.v_x, command.v_y, command.v_z);
+    leg_BR.compute_IK_XYZ(command.v_x, command.v_y, command.v_z);
+    leg_FR.compute_IK_XYZ(command.v_x, command.v_y, command.v_z);
+    leg_BL.compute_IK_XYZ(command.v_x, command.v_y, command.v_z);
 
+    /*for testing
+      Serial.println("V_X: " + String(command.v_x));
+      Serial.println("V_Y: " + String(command.v_y));
+      Serial.println("V_Z: " + String(command.v_z));
+      */
+}
 
 void loop () 
 {
-    delay(1000);
-    test_IK(robot_state);
     currentMillis = millis();
     unsigned long et = currentMillis - start_time;
 
-    if (currentMillis - previousMillis > dt) 
-    //init the robot
+
+
+    if (currentMillis - previousMillis > dt)
     {
+      //init the robot
+      get_command(command);
+//      test_IK(command);  //<========== !DANGER!  DON'T ENABLE BOTH test_IK() and gait_controller() AT THE SAME TIME
+      //gait_controller(robot_state, command);
+      yaw_stance(command, a, b, c);
+      Serial.println(x);
+      Serial.println(y);
+      Serial.println(z);
+      Serial.println("+++++++++++++++++");
+      
         if(et > 5000) {
-//            gait_controller(robot_state);   
+
+            //gait_controller(robot_state);
+
         }
         previousMillis = currentMillis;
     } 

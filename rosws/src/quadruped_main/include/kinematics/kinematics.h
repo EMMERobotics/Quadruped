@@ -1,10 +1,11 @@
 #ifndef KINEMATICS_H_
 #define KINEMATICS_H_
 
-#define _MCUENABLE 1
+#define _MCUENABLE 0
 #define _POSIXENABLE 0
 
 #include <math.h>
+#include <stdint.h>
 
 #if _POSIXENABLE == 1
 #include <iostream>
@@ -56,12 +57,11 @@ typedef struct command {
 
 } COMMAND;
 
-void gait_controller(STATE &state, COMMAND command);
+void gait_controller(STATE &state);
 void compute_stance(STATE state);
 void compute_swing(STATE state);
 void static_trot(STATE state);
 void stand(STATE state);
-void yaw_stance(COMMAND command, float &a, float &b, float &c);
 
 class Leg {
     /*
@@ -69,8 +69,6 @@ class Leg {
         - x,y,z inversel kinematics solver for each leg
         - motor interface
     */
-   
-   leg_index leg_i;
    
    float current_x;
    float current_y;
@@ -82,11 +80,9 @@ class Leg {
    int femur_offset;
    int tibia_offset;
 
-   #if _MCUENABLE == 1
    int waist_motor_id;
    int femur_motor_id;
    int tibia_motor_id;
-   #endif
 
    #if _POSIXENABLE == 1
    string waist_motor_id;
@@ -96,8 +92,8 @@ class Leg {
 
 public:
     
+    leg_index leg_i;
     
-    #if _MCUENABLE == 1
     Leg(  leg_index _leg_i, 
           uint8_t _waist_motor_id,
           uint8_t _femur_motor_id,
@@ -105,7 +101,7 @@ public:
           int _waist_offset,
           int _femur_offset,
           int _tibia_offset);
-    #endif
+    //#endif
           
     void compute_IK_XYZ(float x, float y, float z);
 
@@ -121,7 +117,6 @@ public:
     float tibiaAngle;
     
 };
-
 extern Leg leg_FL;
 extern Leg leg_FR;
 extern Leg leg_BL;
