@@ -60,12 +60,12 @@ servo1.angle = 92
 servo2.angle = 97
 servo3.angle = 85
 servo4.angle = 132
-servo5.angle = 45
-servo6.angle = 139
+servo5.angle = 47
+servo6.angle = 140
 servo7.angle = 40
 servo8.angle = 96
-servo9.angle = 85
-servo10.angle = 80
+servo9.angle = 83
+servo10.angle = 83
 servo11.angle = 85
 
 """

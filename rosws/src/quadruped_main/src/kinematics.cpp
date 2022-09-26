@@ -4,6 +4,7 @@
 //============ GAIT PARAMS =============================================
 //special macros for testing
 #define RATE 4 //Hz
+#define STILLTIME 0.3
 
 #define STEP_SIZE 40
 #define STEP_SIZE_Y 30

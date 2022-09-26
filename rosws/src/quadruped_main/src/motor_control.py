@@ -70,8 +70,8 @@ class Leg:
 
 #create leg object for each legs
 leg_FL = Leg(0, 0,  4,  8, -7, -3,  6) #check the offset unit -- offset will be directly added to the command
-leg_FR = Leg(1, 1,  5,  9,  2,  0, -5)
-leg_BL = Leg(2, 2,  6, 10,  7,  4, -10)
+leg_FR = Leg(1, 1,  5,  9,  2,  2, -7)
+leg_BL = Leg(2, 2,  6, 10,  7,  5, -7)
 leg_BR = Leg(3, 3,  7, 11, -5, -5, -5)
 
 
