@@ -70,8 +70,6 @@ class Leg {
         - motor interface
     */
    
-   
-   
    float current_x;
    float current_y;
    float current_z;
@@ -82,11 +80,9 @@ class Leg {
    int femur_offset;
    int tibia_offset;
 
-   //#if _MCUENABLE == 1
    int waist_motor_id;
    int femur_motor_id;
    int tibia_motor_id;
-   //#endif
 
    #if _POSIXENABLE == 1
    string waist_motor_id;
@@ -98,7 +94,6 @@ public:
     
     leg_index leg_i;
     
-    //#if _MCUENABLE == 1
     Leg(  leg_index _leg_i, 
           uint8_t _waist_motor_id,
           uint8_t _femur_motor_id,

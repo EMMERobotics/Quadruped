@@ -31,8 +31,6 @@ STATE robot_state = {
 void parse_motor_command(ros::Publisher pub, Leg leg) {
 
   quadruped_main::leg_comm_msg msg;
-  
-  // geometry_msgs::Twist msg1;
 
   msg.leg         = leg.leg_i;
   msg.hipAngle    = leg.hipAngle;
@@ -50,10 +48,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "kinematics_node");
   ros::NodeHandle n;
   ros::Publisher motor_comm_pub = n.advertise<quadruped_main::leg_comm_msg>("motor_command", 1000);
-  // ros::Publisher motor_comm_pub = n.advertise<geometry_msgs::Twist>("motor_command", 1000);
   ros::Rate loop_rate(100);
-
-  int count = 0;
 
   while (ros::ok())
   {
@@ -73,8 +68,7 @@ int main(int argc, char **argv)
 
     ros::spinOnce();
     loop_rate.sleep();
-
-    ++count;
+    
   }
 
   return 0;
