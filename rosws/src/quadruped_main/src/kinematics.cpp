@@ -227,7 +227,7 @@ Leg leg_BR( BackR,
 */
 
 //special macros for testing
-#define RATE 4 //Hz
+#define RATE 6 //Hz
 #define STILLTIME 0.3 //percent of the gait cycle that all 4 legs will be on the ground
 
 void gait_controller(STATE &state) {
@@ -270,10 +270,10 @@ void gait_controller(STATE &state) {
     //std::cout << state.ticks << std::endl;
     if (state.ticks > N_TICKS) state.ticks = N_TICKS;
 
-    //compute_swing(state);
-    //compute_stance(state);
+    compute_swing(state);
+    compute_stance(state);
 
-    static_trot(state);
+    //static_trot(state);
 
 }
 

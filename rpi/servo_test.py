@@ -55,10 +55,10 @@ servo11 = servo.Servo(pca.channels[11], min_pulse=minrange, max_pulse=maxrange )
 
 
 # We sleep in the loops to give the servo time to move into position.
-servo0.angle = 87
+servo0.angle = 83
 servo1.angle = 92
-servo2.angle = 87
-servo3.angle = 96
+servo2.angle = 97
+servo3.angle = 85
 servo4.angle = 132
 servo5.angle = 45
 servo6.angle = 139
@@ -76,5 +76,5 @@ servo11.angle = 85
 #    fraction += 0.01
 #    time.sleep(0.03)
 """
-pca.deinit()
+#pca.deinit()
 
