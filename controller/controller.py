@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import evdev
 import ev3dev.auto as ev3
 import threading
