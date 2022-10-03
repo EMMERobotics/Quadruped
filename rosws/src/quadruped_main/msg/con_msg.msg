@@ -1,4 +1,4 @@
-int8 val_xl
-int8 val_y1
-int8 val_x2
-int8 val_y2
+uint16 val_xl
+uint16 val_y1
+uint16 val_x2
+uint16 val_y2
