@@ -62,6 +62,9 @@ void joy_callback(const quadruped_main::con_msg::ConstPtr& msg) {
     ROS_INFO("Value y2 is: [%i]", msg->val_y2);
 
     command.v_x = msg->val_x1;
+    command.v_y = msg->val_y1;
+    command.v_z = msg->val_x2;
+    command.roll = msg->val_y2;
 
 }
 
