@@ -37,7 +37,7 @@ def joystick():
                 if event.code == 3:         #X axis on right stick
                     msg.val_x2 = event.value
                 if event.code == 0:         #X axis on left stick
-                    msg.val_xl = event.value
+                    msg.val_x1 = event.value
                 if event.code == 1:         #Y axis on left stick
                     msg.val_y1 = event.value
 

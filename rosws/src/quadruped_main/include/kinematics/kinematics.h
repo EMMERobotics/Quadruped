@@ -43,6 +43,7 @@ typedef struct state {
     int ticks;
     int mode;
     bool pairs;
+
     
 } STATE;
 
