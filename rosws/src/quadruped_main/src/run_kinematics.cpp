@@ -3,6 +3,7 @@
 #include <geometry_msgs/Pose2D.h>
 #include <quadruped_main/leg_comm_msg.h>
 #include "kinematics/kinematics.h"
+#include <quadruped_main/con_msg.h>
 
 
 STATE robot_state = { 
@@ -26,6 +27,19 @@ STATE robot_state = {
     .mode = 0,
     .pairs = true
 
+    .robot_phase = STILL
+
+};
+
+COMMAND command {
+    
+    .v_x = 0,
+    .v_y = 0,
+    .v_z = 0,
+    .roll = 0,
+    .pitch = 0,
+    .yaw = 0
+
 };
 
 void parse_motor_command(ros::Publisher pub, Leg leg) {
@@ -42,12 +56,20 @@ void parse_motor_command(ros::Publisher pub, Leg leg) {
   
 }
 
+void joy_callback(const quadruped_main::con_msg::ConstPtr& msg) {
+    ROS_INFO("Value x1 is: [%i]", msg->val_x1);
+    ROS_INFO("Value y1 is: [%i]", msg->val_y1);
+    ROS_INFO("Value x2 is: [%i]", msg->con_msg.val_x2());
+    ROS_INFO("Value y2 is: [%i]", msg->con_msg.val_y2());
+}
+
 
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "kinematics_node");
   ros::NodeHandle n;
   ros::Publisher motor_comm_pub = n.advertise<quadruped_main::leg_comm_msg>("motor_command", 1000);
+  ros::Subscriber sub = n.subscribe("joy_val", 10000, joy_callback)
   ros::Rate loop_rate(100);
 
   while (ros::ok())
