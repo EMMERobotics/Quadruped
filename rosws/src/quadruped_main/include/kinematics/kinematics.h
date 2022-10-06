@@ -23,6 +23,15 @@ enum leg_index {
     BackR  //3
 };
 
+enum robot_phase {
+    STILL,
+    TROT,
+    CRAW_DIS,
+    CRAW_CONT,
+    STEP_TROT,
+    STOP_TROT
+};
+
 typedef struct state {
 
     int dt;
@@ -43,6 +52,9 @@ typedef struct state {
     int ticks;
     int mode;
     bool pairs;
+
+    robot_phase exphase;
+    robot_phase comphase;
     
 } STATE;
 
