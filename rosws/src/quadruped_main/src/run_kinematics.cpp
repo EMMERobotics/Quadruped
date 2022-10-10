@@ -25,7 +25,10 @@ STATE robot_state = {
 
     .ticks = 0,
     .mode = 0,
-    .pairs = true
+    .pairs = true,
+
+    .phase = STILL,
+    .previous_phase = STILL
 
 
 };
