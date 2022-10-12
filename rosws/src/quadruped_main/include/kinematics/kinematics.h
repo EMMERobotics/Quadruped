@@ -103,7 +103,7 @@ public:
           int _tibia_offset);
     //#endif
           
-    void compute_IK_XYZ(float x, float y, float z);
+    void compute_IK_XYZ(float x, float y, float z, float row, float pitch, float yaw);
 
     #if _MCUENABLE == 1
     //void motor(float hipAngle, float femurAngle, float tibiaAngle);
