@@ -47,13 +47,13 @@ def joystick():
         if event != None:
             if event.type == 3:             #A stick is moved
                 if event.code == 4:         #Y axis on right stick
-                    msg.val_y2 = deadzone(event.value, 127, 16)
+                    msg.val_y2 = deadzone(event.value, 127, 64)
                 if event.code == 3:         #X axis on right stick
-                    msg.val_x2 = deadzone(event.value, 127, 16)
+                    msg.val_x2 = deadzone(event.value, 127, 64)
                 if event.code == 0:         #X axis on left stick
-                    msg.val_x1 = deadzone(event.value, 127, 16)
+                    msg.val_x1 = deadzone(event.value, 127, 64)
                 if event.code == 1:         #Y axis on left stick
-                    msg.val_y1 = deadzone(event.value, 127, 16)
+                    msg.val_y1 = deadzone(event.value, 127, 64)
 
         #rospy.loginfo(con_msg.val_y2)
         pub.publish(msg)

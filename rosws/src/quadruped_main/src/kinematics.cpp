@@ -1,9 +1,10 @@
 #include "kinematics/kinematics.h"
+#include <iostream>
 #define PI 3.14159
 
 //============ GAIT PARAMS =============================================
 //special macros for testing
-#define RATE 4 //Hz
+#define RATE 6 //Hz
 #define STILLTIME 0.3
 
 #define STEP_SIZE 40
@@ -175,26 +176,26 @@ void gait_controller(STATE &state) {
     }
 
     //read state change command
-    //if (some button is pressed) {
-    //    state.comphase = TROT;
-    //}
-    //else {
-    //    state.comphase = STILL;
-    //}
+    if (state.com_vx == 127) {
+        state.comphase = STILL;
+    }
+    else {
+        state.comphase = TROT;
+    }
 
     if (state.exphase == STILL && state.comphase == TROT) {
         state.exphase = STEP_TROT;
     }
 
-    else if (state.comphase == TROT && state.exphase == STEP_TROT && state.ticks == 100) {
+    else if (state.comphase == TROT && state.exphase == STEP_TROT && state.ticks > 90) {
         state.exphase = TROT;
     }
 
-    else if (state.comphase == STILL && state.exphase == TROT  && state.ticks == 100) {
-        state.exphase == STOP_TROT;
+    else if (state.comphase == STILL && state.exphase == TROT  && state.ticks > 90) {
+        state.exphase = STOP_TROT;
     }
 
-    else if (state.comphase == STILL && state.exphase == STOP_TROT  && state.ticks == 100) {
+    else if (state.comphase == STILL && state.exphase == STOP_TROT  && state.ticks > 90) {
         state.exphase = STILL;
     }
 
@@ -207,7 +208,7 @@ void gait_controller(STATE &state) {
     compute_stance(state);
 
     //static_trot(state);
-
+    //stand(state);
 }
 
 float exec_tick = N_TICKS - STILLTIME*N_TICKS;
@@ -261,8 +262,9 @@ void compute_stance(STATE state) {
    
     float x;
     float y;
-    x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
-    y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100);
+    float z;
+    //x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
+    //y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100);
    
     switch (state.exphase)
     {
@@ -276,11 +278,13 @@ void compute_stance(STATE state) {
     
     case TROT:
         x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
-        y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100); 
+        //y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100); 
         break;
 
     default:
         x = 0;
+	y = 0;
+	z = 0;
         break;
     }
 
@@ -309,25 +313,32 @@ void compute_swing(STATE state) {
     */
 
     float x;
-    float y = (STEP_SIZE_Y*state.ticks/200) - (STEP_SIZE_Y/4);
-    float z = STEP_HEIGHT*sin(state.ticks*(PI/100));
+    float y;
+    float z;
+    //float y = (STEP_SIZE_Y*state.ticks/200) - (STEP_SIZE_Y/4);
+    //float z = STEP_HEIGHT*sin(state.ticks*(PI/100));
 
     switch (state.exphase)
     {
     case STEP_TROT:
         x = (STEP_SIZE*state.ticks/400);
+	z = STEP_HEIGHT*sin(state.ticks*(PI/100));
         break;
     
     case STOP_TROT:
         x = (STEP_SIZE*state.ticks/400) - (STEP_SIZE/4); 
+	z = STEP_HEIGHT*sin(state.ticks*(PI/100));
         break;
 
     case TROT:
         x = (STEP_SIZE*state.ticks/200) - (STEP_SIZE/4); 
+	z = STEP_HEIGHT*sin(state.ticks*(PI/100));
         break;
     
     default:
         x = 0;
+	y = 0;
+	z = 0;
         break;
     }
 
@@ -343,32 +354,3 @@ void compute_swing(STATE state) {
 
 }
 
-void yaw_stance(COMMAND command, float &a, float &b, float &c) {
-
-    float theta = command.yaw;
-
-    float alpha;
-    float r_l;
-    float beta;
-    float phi;
-    float x;
-    float y;
-    float z;
-    float r;
-    
-
-    alpha = PI/2 - theta/2;
-    r_l = 2 * sqrt(pow(W_ROBOT, 2) + pow(L_ROBOT, 2))/2 * cos(alpha);
-    beta = atan(W_ROBOT/L_ROBOT);
-    phi = PI - beta - alpha;
-    r = theta/THETA_MAX*(R_MAX - VERT_OFFSET) + VERT_OFFSET;
-
-    x = r_l * cos(phi);
-    y = r_l * sin(phi);
-    z = VERT_OFFSET - pow(( pow(r,2) - pow(x,2) - pow(y,2) ), 0.5);
-    
-    leg_FL.compute_IK_XYZ(x, y, z);
-    leg_FR.compute_IK_XYZ(-x, y, z);
-    leg_BL.compute_IK_XYZ(x, -y, z);
-    leg_BR.compute_IK_XYZ(-x, -y, z);
-}
