@@ -58,48 +58,55 @@ Leg::Leg(   leg_index _leg_i,
 }
 
 void Leg::compute_IK_XYZ(float x, float y, float z, float row, float pitch, float yaw) {
-    
+
+	float y_row;
+	float z_row;
+	float x_pitch;
+	float z_pitch;
+	float x_yaw;
+	float y_yaw;
+    	float row_test;
     // row
     if (leg_i == 0 || leg_i == 2) {
-        float y_row = W_ROBOT*(1-cos(row))/2;
-        float z_row = -W_ROBOT*sin(row)/2;
+        y_row = W_ROBOT*(1-cos(row))/2;
+        z_row = -W_ROBOT*sin(row)/2;
     }
     else {
-        row *= -1;
-        float y_row = -W_ROBOT*(1-cos(row))/2;
-        float z_row = -W_ROBOT*sin(row)/2;
+        row_test = -row;
+        y_row = -W_ROBOT*(1-cos(-row))/2;
+        z_row = -W_ROBOT*sin(-row)/2;
     }
 
     // pitch
     if (leg_i == 0 || leg_i == 2) {
-        float x_pitch = L_ROBOT*(1-cos(pitch))/2;
-        float z_pitch = -L_ROBOT*sin(pitch)/2;
+        x_pitch = L_ROBOT*(1-cos(pitch))/2;
+        z_pitch = -L_ROBOT*sin(pitch)/2;
     }
     else {
         pitch *= -1;
-        float x_pitch = -L_ROBOT*(1-cos(pitch))/2;
-        float z_pitch = -L_ROBOT*sin(pitch)/2;
+        x_pitch = -L_ROBOT*(1-cos(pitch))/2;
+        z_pitch = -L_ROBOT*sin(pitch)/2;
     }
     
     // yaw
     float alpha = PI/2 - yaw/2;
-    float phi = PI - alpha - beta;
+    float phi_yaw = PI - alpha - beta;
     float r_l = cos(alpha) * P;
     if (leg_i == 0) {
-        float x_yaw = r_l * cos(phi);
-        float y_yaw = - r_l * sin(phi);
+        x_yaw = r_l * cos(phi_yaw);
+        y_yaw = - r_l * sin(phi_yaw);
     }
     else if (leg_i == 3) {
-        float x_yaw = - r_l * cos(phi);
-        float y_yaw = r_l * sin(phi);
+        x_yaw = - r_l * cos(phi_yaw);
+        y_yaw = r_l * sin(phi_yaw);
     }
     else if (leg_i == 1) {
-        float x_yaw = - r_l * cos(-phi);
-        float y_yaw = r_l * sin(-phi);
+        x_yaw = - r_l * cos(-phi_yaw);
+        y_yaw = r_l * sin(-phi_yaw);
     }
     else if (leg_i == 2) {
-        float x_yaw = - r_l * cos(-phi);
-        float y_yaw = r_l * sin(-phi);
+        x_yaw = - r_l * cos(-phi_yaw);
+        y_yaw = r_l * sin(-phi_yaw);
     }
     
     x += x_pitch + x_yaw;
@@ -139,7 +146,7 @@ void Leg::compute_IK_XYZ(float x, float y, float z, float row, float pitch, floa
         beta *= -1;
     }
 
-    hipAngle = beta + PI/2 - row;
+    hipAngle = beta + PI/2 + row_test;
     femurAngle = PI - (theta - zeta) - pitch;
     tibiaAngle = PI - phi; // new leg design
 }
@@ -182,6 +189,12 @@ Leg leg_BR( BackR,
     No class
 */
 
+void test_row(float row) {
+	leg_FL.compute_IK_XYZ(0, 0, 0, row, 0, 0);
+	leg_BR.compute_IK_XYZ(0, 0, 0, row, 0, 0);
+	leg_FR.compute_IK_XYZ(0, 0, 0, row, 0, 0);
+	leg_BL.compute_IK_XYZ(0, 0, 0, row, 0, 0);
+}
 void gait_controller(STATE &state) {
     
     /* 
@@ -208,7 +221,8 @@ void gait_controller(STATE &state) {
     float incremented_ticks;
     float period_x; //ms for 1 cycle
     float ms_per_ticks;
-
+    float row = 0.1745;
+    test_row(row);
     if (state.ticks == 100) {
         state.ticks = 0;
         state.pairs = !state.pairs;
@@ -221,8 +235,8 @@ void gait_controller(STATE &state) {
     state.ticks += incremented_ticks;
     if (state.ticks > N_TICKS) state.ticks = N_TICKS;
 
-    compute_swing(state);
-    compute_stance(state);
+    //compute_swing(state);
+    //compute_stance(state);
 
     //static_trot(state);
 
@@ -322,3 +336,4 @@ void compute_swing(STATE state) {
     }
    
 }
+
