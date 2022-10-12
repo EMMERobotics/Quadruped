@@ -23,6 +23,15 @@ enum leg_index {
     BackR  //3
 };
 
+enum robot_phase {
+    STILL,
+    TROT,
+    CRAW_DIS,
+    CRAW_CONT,
+    STEP_TROT,
+    STOP_TROT
+};
+
 typedef struct state {
 
     int dt;
@@ -43,19 +52,18 @@ typedef struct state {
     int ticks;
     int mode;
     bool pairs;
+
+    int com_vx;
+    int com_vy;
+    int com_vz;
+    int com_roll;
+    int com_pitch;
+    int com_yaw;
+
+    robot_phase exphase;
+    robot_phase comphase;
     
 } STATE;
-
-typedef struct command {
-    
-    float v_x;
-    float v_y;
-    float v_z;
-    float roll;
-    float pitch;
-    float yaw;
-
-} COMMAND;
 
 void gait_controller(STATE &state);
 void compute_stance(STATE state);

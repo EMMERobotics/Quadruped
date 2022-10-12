@@ -65,7 +65,7 @@ class Leg:
         self.tibia_servo.angle = tibiaCommand
 
         #for debug
-        rospy.loginfo("Leg:%d hip:%f, femur:%f, tibia:%f " % (self.leg_i, hipCommand, femurCommand, tibiaCommand))
+        #rospy.loginfo("Leg:%d hip:%f, femur:%f, tibia:%f " % (self.leg_i, hipCommand, femurCommand, tibiaCommand))
 
 
 #create leg object for each legs
