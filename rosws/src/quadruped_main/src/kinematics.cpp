@@ -57,35 +57,33 @@ Leg::Leg(   leg_index _leg_i,
 
 }
 
-void Leg::compute_IK_XYZ(float x, float y, float z, float row, float pitch, float yaw) {
+void Leg::compute_IK_XYZ(float x, float y, float z, float roll, float pitch, float yaw) {
 
-	float y_row;
-	float z_row;
+	float y_roll;
+	float z_roll;
 	float x_pitch;
 	float z_pitch;
 	float x_yaw;
 	float y_yaw;
-    	float row_test;
+
     // row
     if (leg_i == 0 || leg_i == 2) {
-        y_row = W_ROBOT*(1-cos(row))/2;
-        z_row = -W_ROBOT*sin(row)/2;
+        y_roll = W_ROBOT*(1-cos(roll))/2;
+        z_roll = -W_ROBOT*sin(roll)/2;
     }
     else {
-        row_test = -row;
-        y_row = -W_ROBOT*(1-cos(-row))/2;
-        z_row = -W_ROBOT*sin(-row)/2;
+        y_roll = -W_ROBOT*(1-cos(-roll))/2;
+        z_roll = -W_ROBOT*sin(-roll)/2;
     }
 
     // pitch
-    if (leg_i == 0 || leg_i == 2) {
+    if (leg_i == 0 || leg_i == 1) {
         x_pitch = L_ROBOT*(1-cos(pitch))/2;
         z_pitch = -L_ROBOT*sin(pitch)/2;
     }
     else {
-        pitch *= -1;
-        x_pitch = -L_ROBOT*(1-cos(pitch))/2;
-        z_pitch = -L_ROBOT*sin(pitch)/2;
+        x_pitch = -L_ROBOT*(1-cos(-pitch))/2;
+        z_pitch = -L_ROBOT*sin(-pitch)/2;
     }
     
     // yaw
@@ -110,8 +108,8 @@ void Leg::compute_IK_XYZ(float x, float y, float z, float row, float pitch, floa
     }
     
     x += x_pitch + x_yaw;
-    y += y_row + y_yaw;
-    z += z_row + z_pitch;
+    y += y_roll + y_yaw;
+    z += z_roll + z_pitch;
 
     // refference from front left leg
     
@@ -146,7 +144,7 @@ void Leg::compute_IK_XYZ(float x, float y, float z, float row, float pitch, floa
         beta *= -1;
     }
 
-    hipAngle = beta + PI/2 + row_test;
+    hipAngle = beta + PI/2 - roll;
     femurAngle = PI - (theta - zeta) - pitch;
     tibiaAngle = PI - phi; // new leg design
 }
@@ -189,11 +187,11 @@ Leg leg_BR( BackR,
     No class
 */
 
-void test_row(float row) {
-	leg_FL.compute_IK_XYZ(0, 0, 0, row, 0, 0);
-	leg_BR.compute_IK_XYZ(0, 0, 0, row, 0, 0);
-	leg_FR.compute_IK_XYZ(0, 0, 0, row, 0, 0);
-	leg_BL.compute_IK_XYZ(0, 0, 0, row, 0, 0);
+void test_roll(float roll) {
+	leg_FL.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
+	leg_BR.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
+	leg_FR.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
+	leg_BL.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
 }
 void gait_controller(STATE &state) {
     
@@ -221,8 +219,8 @@ void gait_controller(STATE &state) {
     float incremented_ticks;
     float period_x; //ms for 1 cycle
     float ms_per_ticks;
-    float row = 0.1745;
-    test_row(row);
+    float roll = 0.1745;
+    test_roll(roll);
     if (state.ticks == 100) {
         state.ticks = 0;
         state.pairs = !state.pairs;
