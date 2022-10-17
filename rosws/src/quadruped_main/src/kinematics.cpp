@@ -188,11 +188,11 @@ Leg leg_BR( BackR,
     No class
 */
 
-void test_roll(float roll) {
-	leg_FL.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
-	leg_BR.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
-	leg_FR.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
-	leg_BL.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
+void test_rpy(STATE state) {
+	leg_FL.compute_IK_XYZ(0, 0, 0, state.com_vx, state.com_vy, state.com_vz);
+	leg_BR.compute_IK_XYZ(0, 0, 0, state.com_vx, state.com_vy, state.com_vz);
+	leg_FR.compute_IK_XYZ(0, 0, 0, state.com_vx, state.com_vy, state.com_vz);
+	leg_BL.compute_IK_XYZ(0, 0, 0, state.com_vx, state.com_vy, state.com_vz);
 }
 void gait_controller(STATE &state) {
     
@@ -258,16 +258,13 @@ void gait_controller(STATE &state) {
         state.exphase = STILL;
     }
 
-    float roll = 0.1745;
-    test_roll(roll);
-
     if (state.ticks == 100) {
         state.ticks = 0;
         state.pairs = !state.pairs;
     }
-
-    compute_swing(state);
-    compute_stance(state);
+    test_rpy(state);
+    //compute_swing(state);
+    //compute_stance(state);
 
 
     //static_trot(state);
