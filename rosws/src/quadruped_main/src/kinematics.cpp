@@ -26,8 +26,8 @@
 #define FEMUR_ANGLE_OFFSET 0.7854 //45 degree
 #define TIBIA_ANGLE_OFFSET 1.5708 //90degree1
 //==========================================================================================
-
-
+const float beta = atan(W_ROBOT/L_ROBOT);
+const float P = sqrt(pow(W_ROBOT, 2) + pow(L_ROBOT, 2));
 //==========================================================================================
 /*
     Leg Class
@@ -58,7 +58,60 @@ Leg::Leg(   leg_index _leg_i,
 
 }
 
-void Leg::compute_IK_XYZ(float x, float y, float z) {
+void Leg::compute_IK_XYZ(float x, float y, float z, float roll, float pitch, float yaw) {
+
+	float y_roll;
+	float z_roll;
+	float x_pitch;
+	float z_pitch;
+	float x_yaw;
+	float y_yaw;
+
+    // row
+    if (leg_i == 0 || leg_i == 2) {
+        y_roll = W_ROBOT*(1-cos(roll))/2;
+        z_roll = -W_ROBOT*sin(roll)/2;
+    }
+    else {
+        y_roll = -W_ROBOT*(1-cos(-roll))/2;
+        z_roll = -W_ROBOT*sin(-roll)/2;
+    }
+
+    // pitch
+    if (leg_i == 0 || leg_i == 1) {
+        x_pitch = L_ROBOT*(1-cos(pitch))/2;
+        z_pitch = -L_ROBOT*sin(pitch)/2;
+    }
+    else {
+        x_pitch = -L_ROBOT*(1-cos(-pitch))/2;
+        z_pitch = -L_ROBOT*sin(-pitch)/2;
+    }
+    
+    // yaw
+    float alpha = PI/2 - yaw/2;
+    float phi_yaw = PI - alpha - beta;
+    float r_l = cos(alpha) * P;
+    if (leg_i == 0) {
+        x_yaw = r_l * cos(phi_yaw);
+        y_yaw = - r_l * sin(phi_yaw);
+    }
+    else if (leg_i == 3) {
+        x_yaw = - r_l * cos(phi_yaw);
+        y_yaw = r_l * sin(phi_yaw);
+    }
+    else if (leg_i == 1) {
+        x_yaw = - r_l * cos(-phi_yaw);
+        y_yaw = r_l * sin(-phi_yaw);
+    }
+    else if (leg_i == 2) {
+        x_yaw = - r_l * cos(-phi_yaw);
+        y_yaw = r_l * sin(-phi_yaw);
+    }
+    
+    x += x_pitch + x_yaw;
+    y += y_roll + y_yaw;
+    z += z_roll + z_pitch;
+
     // refference from front left leg
     
     float horr_offset = HOR_OFFSET;
@@ -92,8 +145,8 @@ void Leg::compute_IK_XYZ(float x, float y, float z) {
         beta *= -1;
     }
 
-    hipAngle = beta + PI/2;
-    femurAngle = PI - (theta - zeta);
+    hipAngle = beta + PI/2 - roll;
+    femurAngle = PI - (theta - zeta) - pitch;
     tibiaAngle = PI - phi; // new leg design
 }
 
@@ -135,6 +188,12 @@ Leg leg_BR( BackR,
     No class
 */
 
+void test_roll(float roll) {
+	leg_FL.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
+	leg_BR.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
+	leg_FR.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
+	leg_BL.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
+}
 void gait_controller(STATE &state) {
     
     /* 
@@ -199,6 +258,9 @@ void gait_controller(STATE &state) {
         state.exphase = STILL;
     }
 
+    float roll = 0.1745;
+    test_roll(roll);
+
     if (state.ticks == 100) {
         state.ticks = 0;
         state.pairs = !state.pairs;
@@ -206,6 +268,7 @@ void gait_controller(STATE &state) {
 
     compute_swing(state);
     compute_stance(state);
+
 
     //static_trot(state);
     //stand(state);
@@ -229,21 +292,21 @@ void static_trot(STATE state) {
     }
 
     if (state.pairs) {
-        leg_FL.compute_IK_XYZ(0, 0, z);
-        leg_BR.compute_IK_XYZ(0, 0, z);
+        leg_FL.compute_IK_XYZ(0, 0, z, 0, 0, 0);
+        leg_BR.compute_IK_XYZ(0, 0, z, 0, 0, 0);
     }
 
     else {
-        leg_FR.compute_IK_XYZ(0, 0, z);
-        leg_BL.compute_IK_XYZ(0, 0, z);
+        leg_FR.compute_IK_XYZ(0, 0, z, 0, 0, 0);
+        leg_BL.compute_IK_XYZ(0, 0, z, 0, 0, 0);
     }
 }
 
 void stand(STATE state) {
-    leg_FL.compute_IK_XYZ(0, 0, 0);
-    leg_BR.compute_IK_XYZ(0, 0, 0);
-    leg_FR.compute_IK_XYZ(0, 0, 0);
-    leg_BL.compute_IK_XYZ(0, 0, 0);
+    leg_FL.compute_IK_XYZ(0, 0, 0, 0, 0, 0);
+    leg_BR.compute_IK_XYZ(0, 0, 0, 0, 0, 0);
+    leg_FR.compute_IK_XYZ(0, 0, 0, 0, 0, 0);
+    leg_BL.compute_IK_XYZ(0, 0, 0, 0, 0, 0);
 }
 
 
@@ -289,13 +352,14 @@ void compute_stance(STATE state) {
     }
 
     if (state.pairs) {
-        leg_FL.compute_IK_XYZ(x, 0, 0);
-        leg_BR.compute_IK_XYZ(x, 0, 0);
+
+        leg_FL.compute_IK_XYZ(x, y, 0, 0, 0, 0);
+        leg_BR.compute_IK_XYZ(x, y, 0, 0, 0, 0);
     }
 
     else {
-        leg_FR.compute_IK_XYZ(x, 0, 0);
-        leg_BL.compute_IK_XYZ(x, 0, 0);
+        leg_FR.compute_IK_XYZ(x, y, 0, 0, 0, 0);
+        leg_BL.compute_IK_XYZ(x, y, 0, 0, 0, 0);
     }
 }
 
@@ -342,15 +406,14 @@ void compute_swing(STATE state) {
         break;
     }
 
-    if (state.pairs) {
-        leg_FL.compute_IK_XYZ(x, 0, z);
-        leg_BR.compute_IK_XYZ(x, 0, z);
+   if (!state.pairs) {
+        leg_FL.compute_IK_XYZ(x, y, z, 0, 0, 0);
+        leg_BR.compute_IK_XYZ(x, y, z, 0, 0, 0);
     }
 
     else {
-        leg_FR.compute_IK_XYZ(x, 0, z);
-        leg_BL.compute_IK_XYZ(x, 0, z);
+        leg_FR.compute_IK_XYZ(x, y, z, 0, 0, 0);
+        leg_BL.compute_IK_XYZ(x, y, z, 0, 0, 0);
     }
 
 }
-
