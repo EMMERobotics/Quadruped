@@ -188,11 +188,24 @@ Leg leg_BR( BackR,
     No class
 */
 
+float map(float val, int min_old, int max_old, int min_new, int max_new) {
+    float new_val;
+    new_val = val/(max_old-min_old) * (max_new-min_new) + min_new;
+    return new_val
+}
+
+
 void test_rpy(STATE state) {
-	leg_FL.compute_IK_XYZ(0, 0, 0, state.com_vx, state.com_vy, state.com_vz);
-	leg_BR.compute_IK_XYZ(0, 0, 0, state.com_vx, state.com_vy, state.com_vz);
-	leg_FR.compute_IK_XYZ(0, 0, 0, state.com_vx, state.com_vy, state.com_vz);
-	leg_BL.compute_IK_XYZ(0, 0, 0, state.com_vx, state.com_vy, state.com_vz);
+    float roll;
+    float pitch;
+    float yaw;
+    roll = map(state.com_vx, 0, 255, -10, 10);
+    pitch = map(state.com_vy, 0, 255, -10, 10);
+    yaw = map(state.com_vz, 0, 255, -10, 10);
+	leg_FL.compute_IK_XYZ(0, 0, 0, roll, pitch, yaw);
+    leg_BR.compute_IK_XYZ(0, 0, 0, roll, pitch, yaw);
+    leg_FR.compute_IK_XYZ(0, 0, 0, roll, pitch, yaw);
+    leg_BL.compute_IK_XYZ(0, 0, 0, roll, pitch, yaw);
 }
 void gait_controller(STATE &state) {
     
