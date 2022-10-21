@@ -67,7 +67,7 @@ void Leg::compute_IK_XYZ(float x, float y, float z, float roll, float pitch, flo
 	float x_yaw;
 	float y_yaw;
 
-    // row
+    // roll
     if (leg_i == 0 || leg_i == 2) {
         y_roll = W_ROBOT*(1-cos(roll))/2;
         z_roll = -W_ROBOT*sin(roll)/2;
@@ -88,24 +88,39 @@ void Leg::compute_IK_XYZ(float x, float y, float z, float roll, float pitch, flo
     }
     
     // yaw
-    float alpha = PI/2 - yaw/2;
-    float phi_yaw = PI - alpha - beta;
-    float r_l = cos(alpha) * P;
+    float alpha;
+    float phi_yaw;
+    float r_l;
+    alpha = PI/2 - abs(yaw/2);
+    r_l = cos(alpha) * P;
+    if (leg_i == 0 ||  leg_i == 3) {
+        if (yaw > 0) phi_yaw = PI - alpha - beta;
+        else phi_yaw = PI - alpha - beta - abs(yaw);
+    }
+    else if (leg_i == 0 ||  leg_i == 3) {
+        if (yaw > 0) phi_yaw = PI - alpha - beta - abs(yaw);
+        else phi_yaw = PI - alpha - beta;
+    }
+    
+    int operate;
+    if (yaw<0) operate = -1;
+    else operate = 1;
+
     if (leg_i == 0) {
-        x_yaw = r_l * cos(phi_yaw);
-        y_yaw = - r_l * sin(phi_yaw);
+        x_yaw = operate * r_l * cos(phi_yaw);
+        y_yaw = (-1) * operate * r_l * sin(phi_yaw);
     }
     else if (leg_i == 3) {
-        x_yaw = - r_l * cos(phi_yaw);
-        y_yaw = r_l * sin(phi_yaw);
+        x_yaw = (-1) * operate * r_l * cos(phi_yaw);
+        y_yaw = operate * r_l * sin(phi_yaw);
     }
     else if (leg_i == 1) {
-        x_yaw = - r_l * cos(-phi_yaw);
-        y_yaw = r_l * sin(-phi_yaw);
+        x_yaw = (-1) * operate * r_l * cos(-phi_yaw);
+        y_yaw = (-1) * operate * r_l * sin(-phi_yaw);
     }
     else if (leg_i == 2) {
-        x_yaw = - r_l * cos(-phi_yaw);
-        y_yaw = r_l * sin(-phi_yaw);
+        x_yaw = operate * r_l * cos(-phi_yaw);
+        y_yaw = operate * r_l * sin(-phi_yaw);
     }
     
     x += x_pitch + x_yaw;
@@ -191,7 +206,7 @@ Leg leg_BR( BackR,
 float map(float val, int min_old, int max_old, int min_new, int max_new) {
     float new_val;
     new_val = val/(max_old-min_old) * (max_new-min_new) + min_new;
-    return new_val
+    return new_val;
 }
 
 
