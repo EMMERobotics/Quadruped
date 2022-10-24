@@ -115,12 +115,12 @@ void Leg::compute_IK_XYZ(float x, float y, float z, float roll, float pitch, flo
         y_yaw = operate * r_l * sin(phi_yaw);
     }
     else if (leg_i == 1) {
-        x_yaw = (-1) * operate * r_l * cos(-phi_yaw);
-        y_yaw = (-1) * operate * r_l * sin(-phi_yaw);
+        x_yaw = (-1) * operate * r_l * cos(phi_yaw);
+        y_yaw = (-1) * operate * r_l * sin(phi_yaw);
     }
     else if (leg_i == 2) {
-        x_yaw = operate * r_l * cos(-phi_yaw);
-        y_yaw = operate * r_l * sin(-phi_yaw);
+        x_yaw = operate * r_l * cos(phi_yaw);
+        y_yaw = operate * r_l * sin(phi_yaw);
     }
     
     x += x_pitch + x_yaw;
@@ -211,20 +211,30 @@ float map(float val, int min_old, int max_old, float min_new, float max_new) {
 
 
 void test_rpy(STATE state) {
-    float roll;
-    float pitch;
-    float yaw;
+
+    float x = 0;
+    float y = 0;
+    float z = 0;
+
+    float roll = 0;
+    float pitch = 0;
+    float yaw = 0;
+
     float rad;
     rad = PI*10/180;
+    float dis = 20;
+
     roll = map(state.com_vx, 0, 255, -rad, rad);
-    pitch = map(state.com_vy, 0, 255, -rad, rad);
-    yaw = map(state.com_vz, 0, 255, -rad, rad);
+    //pitch = map(state.com_vy, 0, 255, -rad, rad);
+    yaw = map(state.com_vy, 0, 255, -rad, rad);
+    x = map(state.com_vz, 0, 255, -dis, dis);
+    //y = map(state.com_roll, 0, 255, -dis, dis);
+    z = map(state.com_roll, 0, 255, -dis, dis);
 
-
-    leg_FL.compute_IK_XYZ(0, 0, 0, roll, pitch, yaw);
-    leg_BR.compute_IK_XYZ(0, 0, 0, roll, pitch, yaw);
-    leg_FR.compute_IK_XYZ(0, 0, 0, roll, pitch, yaw);
-    leg_BL.compute_IK_XYZ(0, 0, 0, roll, pitch, yaw);
+    leg_FL.compute_IK_XYZ(x, y, z, roll, pitch, yaw);
+    leg_BR.compute_IK_XYZ(x, y, z, roll, pitch, yaw);
+    leg_FR.compute_IK_XYZ(x, y, z, roll, pitch, yaw);
+    leg_BL.compute_IK_XYZ(x, y, z, roll, pitch, yaw);
 }
 void gait_controller(STATE &state) {
     
