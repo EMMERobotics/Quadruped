@@ -161,7 +161,7 @@ void Leg::compute_IK_XYZ(float x, float y, float z, float roll, float pitch, flo
     }
 
     hipAngle = beta + PI/2 - roll;
-    femurAngle = PI - (theta - zeta) - pitch;
+    femurAngle = PI - (theta - zeta) + pitch;
     tibiaAngle = PI - phi; // new leg design
 }
 
@@ -203,7 +203,7 @@ Leg leg_BR( BackR,
     No class
 */
 
-float map(float val, int min_old, int max_old, int min_new, int max_new) {
+float map(float val, int min_old, int max_old, float min_new, float max_new) {
     float new_val;
     new_val = val/(max_old-min_old) * (max_new-min_new) + min_new;
     return new_val;
@@ -214,10 +214,14 @@ void test_rpy(STATE state) {
     float roll;
     float pitch;
     float yaw;
-    roll = map(state.com_vx, 0, 255, -10, 10);
-    pitch = map(state.com_vy, 0, 255, -10, 10);
-    yaw = map(state.com_vz, 0, 255, -10, 10);
-	leg_FL.compute_IK_XYZ(0, 0, 0, roll, pitch, yaw);
+    float rad;
+    rad = PI*10/180;
+    roll = map(state.com_vx, 0, 255, -rad, rad);
+    pitch = map(state.com_vy, 0, 255, -rad, rad);
+    yaw = map(state.com_vz, 0, 255, -rad, rad);
+
+
+    leg_FL.compute_IK_XYZ(0, 0, 0, roll, pitch, yaw);
     leg_BR.compute_IK_XYZ(0, 0, 0, roll, pitch, yaw);
     leg_FR.compute_IK_XYZ(0, 0, 0, roll, pitch, yaw);
     leg_BL.compute_IK_XYZ(0, 0, 0, roll, pitch, yaw);
