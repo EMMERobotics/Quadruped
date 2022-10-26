@@ -67,7 +67,7 @@ void Leg::compute_IK_XYZ(float x, float y, float z, float roll, float pitch, flo
 	float x_yaw;
 	float y_yaw;
 
-    // row
+    // roll
     if (leg_i == 0 || leg_i == 2) {
         y_roll = W_ROBOT*(1-cos(roll))/2;
         z_roll = -W_ROBOT*sin(roll)/2;
@@ -88,24 +88,39 @@ void Leg::compute_IK_XYZ(float x, float y, float z, float roll, float pitch, flo
     }
     
     // yaw
-    float alpha = PI/2 - yaw/2;
-    float phi_yaw = PI - alpha - beta;
-    float r_l = cos(alpha) * P;
+    float alpha;
+    float phi_yaw;
+    float r_l;
+    alpha = PI/2 - abs(yaw/2);
+    r_l = cos(alpha) * P;
+    if (leg_i == 0 ||  leg_i == 3) {
+        if (yaw > 0) phi_yaw = PI - alpha - beta;
+        else phi_yaw = PI - alpha - beta - abs(yaw);
+    }
+    else if (leg_i == 0 ||  leg_i == 3) {
+        if (yaw > 0) phi_yaw = PI - alpha - beta - abs(yaw);
+        else phi_yaw = PI - alpha - beta;
+    }
+    
+    int operate;
+    if (yaw<0) operate = -1;
+    else operate = 1;
+
     if (leg_i == 0) {
-        x_yaw = r_l * cos(phi_yaw);
-        y_yaw = - r_l * sin(phi_yaw);
+        x_yaw = operate * r_l * cos(phi_yaw);
+        y_yaw = (-1) * operate * r_l * sin(phi_yaw);
     }
     else if (leg_i == 3) {
-        x_yaw = - r_l * cos(phi_yaw);
-        y_yaw = r_l * sin(phi_yaw);
+        x_yaw = (-1) * operate * r_l * cos(phi_yaw);
+        y_yaw = operate * r_l * sin(phi_yaw);
     }
     else if (leg_i == 1) {
-        x_yaw = - r_l * cos(-phi_yaw);
-        y_yaw = r_l * sin(-phi_yaw);
+        x_yaw = (-1) * operate * r_l * cos(phi_yaw);
+        y_yaw = (-1) * operate * r_l * sin(phi_yaw);
     }
     else if (leg_i == 2) {
-        x_yaw = - r_l * cos(-phi_yaw);
-        y_yaw = r_l * sin(-phi_yaw);
+        x_yaw = operate * r_l * cos(phi_yaw);
+        y_yaw = operate * r_l * sin(phi_yaw);
     }
     
     x += x_pitch + x_yaw;
@@ -146,7 +161,7 @@ void Leg::compute_IK_XYZ(float x, float y, float z, float roll, float pitch, flo
     }
 
     hipAngle = beta + PI/2 - roll;
-    femurAngle = PI - (theta - zeta) - pitch;
+    femurAngle = PI - (theta - zeta) + pitch;
     tibiaAngle = PI - phi; // new leg design
 }
 
@@ -188,11 +203,38 @@ Leg leg_BR( BackR,
     No class
 */
 
-void test_roll(float roll) {
-	leg_FL.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
-	leg_BR.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
-	leg_FR.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
-	leg_BL.compute_IK_XYZ(0, 0, 0, roll, 0, 0);
+float map(float val, int min_old, int max_old, float min_new, float max_new) {
+    float new_val;
+    new_val = val/(max_old-min_old) * (max_new-min_new) + min_new;
+    return new_val;
+}
+
+
+void test_rpy(STATE state) {
+
+    float x = 0;
+    float y = 0;
+    float z = 0;
+
+    float roll = 0;
+    float pitch = 0;
+    float yaw = 0;
+
+    float rad;
+    rad = PI*10/180;
+    float dis = 20;
+
+    roll = map(state.com_vx, 0, 255, -rad, rad);
+    //pitch = map(state.com_vy, 0, 255, -rad, rad);
+    yaw = map(state.com_vy, 0, 255, -rad, rad);
+    x = map(state.com_vz, 0, 255, -dis, dis);
+    //y = map(state.com_roll, 0, 255, -dis, dis);
+    z = map(state.com_roll, 0, 255, -dis, dis);
+
+    leg_FL.compute_IK_XYZ(x, y, z, roll, pitch, yaw);
+    leg_BR.compute_IK_XYZ(x, y, z, roll, pitch, yaw);
+    leg_FR.compute_IK_XYZ(x, y, z, roll, pitch, yaw);
+    leg_BL.compute_IK_XYZ(x, y, z, roll, pitch, yaw);
 }
 void gait_controller(STATE &state) {
     
@@ -258,16 +300,13 @@ void gait_controller(STATE &state) {
         state.exphase = STILL;
     }
 
-    float roll = 0.1745;
-    test_roll(roll);
-
     if (state.ticks == 100) {
         state.ticks = 0;
         state.pairs = !state.pairs;
     }
-
-    compute_swing(state);
-    compute_stance(state);
+    test_rpy(state);
+    //compute_swing(state);
+    //compute_stance(state);
 
 
     //static_trot(state);

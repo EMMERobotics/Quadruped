@@ -62,6 +62,9 @@ void joy_callback(const quadruped_main::con_msg::ConstPtr& msg) {
     
 
     robot_state.com_vx = msg->val_y1;
+    robot_state.com_vy = msg->val_x1;
+    robot_state.com_vz = msg->val_y2;
+    robot_state.com_roll = msg->val_x2;
     //command.v_y = msg->val_x1;
     //command.v_z = msg->val_x2;
     //command.roll = msg->val_y2;
