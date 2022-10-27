@@ -7,7 +7,7 @@
 #define RATE 6 //Hz
 #define STILLTIME 0.3
 
-#define STEP_SIZE 40
+int STEP_SIZE = 40;
 #define STEP_SIZE_Y 30
 #define STEP_HEIGHT 40
 #define N_TICKS 100 // number of ticks per cycle
@@ -34,28 +34,15 @@ const float P = sqrt(pow(W_ROBOT, 2) + pow(L_ROBOT, 2));
 */
 
 //constuctor
-Leg::Leg(   leg_index _leg_i,
-            uint8_t _waist_motor_id,
-            uint8_t _femur_motor_id,
-            uint8_t _tibia_motor_id,
-            int _waist_offset,
-            int _femur_offset,
-            int _tibia_offset)
+Leg::Leg(leg_index _leg_i)
 {
     leg_i = _leg_i;
-
-    waist_motor_id = _waist_motor_id;
-    femur_motor_id = _femur_motor_id;
-    tibia_motor_id = _tibia_motor_id;
-
-    waist_offset = _waist_offset;
-    femur_offset = _femur_offset;
-    tibia_offset = _tibia_offset;
 
     hipAngle = PI/2;
     femurAngle = PI/4;
     tibiaAngle = PI/2;
 
+    phase = STANCE;
 }
 
 void Leg::compute_IK_XYZ(float x, float y, float z, float roll, float pitch, float yaw) {
@@ -165,38 +152,97 @@ void Leg::compute_IK_XYZ(float x, float y, float z, float roll, float pitch, flo
     tibiaAngle = PI - phi; // new leg design
 }
 
+void Leg::compute_stance(STATE state) {
+    /*
+    GOALS:
+        Compute the (X,Y,Z,R,P,Y) of each leg from the phase ticks for the stance legs
 
-Leg leg_FL( FL,     //leg index
-            0,      //waist motor number
-            4,      //femur motor number
-            8,      //tibia motor number
-            70,      //waist offset
-            0,     //femur offset
-            10);    //tibia offset
+    Input:
+        Contact mode
+        Ticks
 
-Leg leg_FR( FR,
-            1,
-            5,
-            9,
-            -50,
-            -20,
-            50);
+    Output:
+        (X,Y,Z,R,P,Y) for each stance legs
+    */
 
-Leg leg_BL( BL,
-            2,
-            6,
-            10,
-            50,
-            20,
-            -70);
+    //x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
+    //y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100);
+   
+    switch (state.exphase)
+    {
 
-Leg leg_BR( BackR,
-            3,
-            7,
-            11,
-            -50,
-            -150,
-            40);
+    case STEP_TROT:
+        current_x = 0 - (STEP_SIZE*state.ticks/200); 
+        break;
+    
+    case STOP_TROT:
+        current_x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/200);
+        break;
+    
+    case TROT:
+        current_x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
+        //y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100); 
+        break;
+
+    default:
+        current_x = 0;
+	    current_y = 0;
+	    current_z = 0;
+        break;
+    }
+
+    compute_IK_XYZ(current_x, current_y, 0, 0, 0, 0);
+}
+
+void Leg::compute_swing(STATE state) {
+    /*
+    GOALS:
+        Compute the (X,Y,Z,R,P,Y) of each leg from the phase ticks for the swing legs
+
+    Input:
+        Contact mode
+        Ticks
+
+    Output:
+        (X,Y,Z,R,P,Y) for each swing legs
+    */
+
+    //float y = (STEP_SIZE_Y*state.ticks/200) - (STEP_SIZE_Y/4);
+    //float z = STEP_HEIGHT*sin(state.ticks*(PI/100));
+
+    switch (state.exphase)
+    {
+    case STEP_TROT:
+        current_x = (STEP_SIZE*state.ticks/400);
+	    current_z = STEP_HEIGHT*sin(state.ticks*(PI/100));
+        break;
+    
+    case STOP_TROT:
+        current_x = (STEP_SIZE*state.ticks/400) - (STEP_SIZE/4); 
+	    current_z = STEP_HEIGHT*sin(state.ticks*(PI/100));
+        break;
+
+    case TROT:
+        current_x = (STEP_SIZE*state.ticks/200) - (STEP_SIZE/4); 
+	    current_z = STEP_HEIGHT*sin(state.ticks*(PI/100));
+        break;
+    
+    default:
+        current_x = 0;
+	    current_y = 0;
+	    current_z = 0;
+        break;
+    }
+    
+    compute_IK_XYZ(current_x, current_y, current_z, 0, 0, 0);
+
+}
+
+
+Leg leg_FL(FL);    //tibia offset
+Leg leg_FR(FR);
+Leg leg_BL(BL;
+Leg leg_BR(BackR);
 
 
 /*
@@ -236,6 +282,7 @@ void test_rpy(STATE state) {
     leg_FR.compute_IK_XYZ(x, y, z, roll, pitch, yaw);
     leg_BL.compute_IK_XYZ(x, y, z, roll, pitch, yaw);
 }
+
 void gait_controller(STATE &state) {
     
     /* 
@@ -276,38 +323,89 @@ void gait_controller(STATE &state) {
         state.ticks = 0;
     }
 
-    //read state change command
-    if (state.com_vx == 127) {
-        state.comphase = STILL;
-    }
-    else {
-        state.comphase = TROT;
-    }
+    switch (state.mode) {
+    
+    case NORM:
+        //read state change command
+        if (state.com_vx == 127) {
+            state.comphase = STILL;
+        }
+        else if (state.com_vx > 127) {
+            state.comphase = TROT;
+        }
 
-    if (state.exphase == STILL && state.comphase == TROT) {
-        state.exphase = STEP_TROT;
-    }
+        else if (state.com_vx < 127) {
+            state.comphase = TROT;
+            STEP_SIZE *= -1;
+        }
 
-    else if (state.comphase == TROT && state.exphase == STEP_TROT && state.ticks > 90) {
-        state.exphase = TROT;
-    }
+        if (state.exphase == STILL && state.comphase == TROT) {
+            state.exphase = STEP_TROT;
+        }
 
-    else if (state.comphase == STILL && state.exphase == TROT  && state.ticks > 90) {
-        state.exphase = STOP_TROT;
-    }
+        else if (state.comphase == TROT && state.exphase == STEP_TROT && state.ticks > 90) {
+            state.exphase = TROT;
+        } 
 
-    else if (state.comphase == STILL && state.exphase == STOP_TROT  && state.ticks > 90) {
+        else if (state.comphase == STILL && state.exphase == TROT  && state.ticks > 90) {
+            state.exphase = STOP_TROT;
+        }
+
+        else if (state.comphase == STILL && state.exphase == STOP_TROT  && state.ticks > 90) {
+            state.exphase = STILL;
+        }
+
+        if (state.ticks == 100) {
+            state.ticks = 0;
+            state.pairs = !state.pairs;
+
+            if (state.pairs) {
+                leg_FL.compute_swing(state);
+                leg_BR.compute_swing(state);
+                leg_FR.compute_stance(state);
+                leg_BL.compute_stance(state);            
+            }
+
+            else {
+                leg_FL.compute_stance(state);
+                leg_BR.compute_stance(state);
+                leg_FR.compute_swing(state);
+                leg_BL.compute_swing(state);
+            }
+        }
+
+
+    case CRAWL:
+        if (state.com_vx == 127) {
+            state.comphase = STILL;
+        }
+        else {
+            state.comphase = CRAWL_DIS;
+        }
+        if (state.exphase == STILL && state.comphase == CRAWL_DIS) {
+            state.exphase = STEP_CRAWL;
+        }
+
+        else if (state.comphase == CRAWL && state.exphase == STEP_CRAWL && state.ticks > 90) {
+            state.exphase = CRAWL_DIS;
+        }
+
+        else if (state.comphase == STILL && state.exphase == CRAWL_DIS  && state.ticks > 90) {
+            state.exphase = STOP_CRAWL;
+        }
+
+        else if (state.comphase == STILL && state.exphase == STOP_CRAWL  && state.ticks > 90) {
+            state.exphase = STILL;
+        }
+
+    case RPY:
+
+    default:
         state.exphase = STILL;
+
     }
 
-    if (state.ticks == 100) {
-        state.ticks = 0;
-        state.pairs = !state.pairs;
-    }
-    test_rpy(state);
-    //compute_swing(state);
-    //compute_stance(state);
-
+    //test_rpy(state);
 
     //static_trot(state);
     //stand(state);
@@ -346,113 +444,4 @@ void stand(STATE state) {
     leg_BR.compute_IK_XYZ(0, 0, 0, 0, 0, 0);
     leg_FR.compute_IK_XYZ(0, 0, 0, 0, 0, 0);
     leg_BL.compute_IK_XYZ(0, 0, 0, 0, 0, 0);
-}
-
-
-void compute_stance(STATE state) {
-    /*
-    GOALS:
-        Compute the (X,Y,Z,R,P,Y) of each leg from the phase ticks for the stance legs
-
-    Input:
-        Contact mode
-        Ticks
-
-    Output:
-        (X,Y,Z,R,P,Y) for each stance legs
-    */
-   
-    float x;
-    float y;
-    float z;
-    //x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
-    //y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100);
-   
-    switch (state.exphase)
-    {
-    case STEP_TROT:
-        x = 0 - (STEP_SIZE*state.ticks/200); 
-        break;
-    
-    case STOP_TROT:
-        x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/200);
-        break;
-    
-    case TROT:
-        x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
-        //y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100); 
-        break;
-
-    default:
-        x = 0;
-	y = 0;
-	z = 0;
-        break;
-    }
-
-    if (state.pairs) {
-
-        leg_FL.compute_IK_XYZ(x, y, 0, 0, 0, 0);
-        leg_BR.compute_IK_XYZ(x, y, 0, 0, 0, 0);
-    }
-
-    else {
-        leg_FR.compute_IK_XYZ(x, y, 0, 0, 0, 0);
-        leg_BL.compute_IK_XYZ(x, y, 0, 0, 0, 0);
-    }
-}
-
-void compute_swing(STATE state) {
-    /*
-    GOALS:
-        Compute the (X,Y,Z,R,P,Y) of each leg from the phase ticks for the swing legs
-
-    Input:
-        Contact mode
-        Ticks
-
-    Output:
-        (X,Y,Z,R,P,Y) for each swing legs
-    */
-
-    float x;
-    float y;
-    float z;
-    //float y = (STEP_SIZE_Y*state.ticks/200) - (STEP_SIZE_Y/4);
-    //float z = STEP_HEIGHT*sin(state.ticks*(PI/100));
-
-    switch (state.exphase)
-    {
-    case STEP_TROT:
-        x = (STEP_SIZE*state.ticks/400);
-	z = STEP_HEIGHT*sin(state.ticks*(PI/100));
-        break;
-    
-    case STOP_TROT:
-        x = (STEP_SIZE*state.ticks/400) - (STEP_SIZE/4); 
-	z = STEP_HEIGHT*sin(state.ticks*(PI/100));
-        break;
-
-    case TROT:
-        x = (STEP_SIZE*state.ticks/200) - (STEP_SIZE/4); 
-	z = STEP_HEIGHT*sin(state.ticks*(PI/100));
-        break;
-    
-    default:
-        x = 0;
-	y = 0;
-	z = 0;
-        break;
-    }
-
-   if (!state.pairs) {
-        leg_FL.compute_IK_XYZ(x, y, z, 0, 0, 0);
-        leg_BR.compute_IK_XYZ(x, y, z, 0, 0, 0);
-    }
-
-    else {
-        leg_FR.compute_IK_XYZ(x, y, z, 0, 0, 0);
-        leg_BL.compute_IK_XYZ(x, y, z, 0, 0, 0);
-    }
-
 }

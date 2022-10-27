@@ -23,13 +23,25 @@ enum leg_index {
     BackR  //3
 };
 
+enum leg_phase {
+    SWING,
+    STANCE
+};
+
 enum robot_phase {
     STILL,
-    TROT,
-    CRAW_DIS,
-    CRAW_CONT,
     STEP_TROT,
-    STOP_TROT
+    TROT,
+    STOP_TROT,
+    STEP_CRAWL,
+    CRAWL_DIS,
+    STOP_CRAWL
+};
+
+enum robot_mode {
+    RPY, 
+    NORM,
+    CRAWL
 };
 
 typedef struct state {
@@ -50,7 +62,6 @@ typedef struct state {
     float p_z;
 
     int ticks;
-    int mode;
     bool pairs;
 
     int com_vx;
@@ -62,6 +73,8 @@ typedef struct state {
 
     robot_phase exphase;
     robot_phase comphase;
+
+    robot_mode mode;
     
 } STATE;
 
@@ -81,37 +94,18 @@ class Leg {
    float current_x;
    float current_y;
    float current_z;
-   
-   bool contact;
-
-   int waist_offset;
-   int femur_offset;
-   int tibia_offset;
-
-   int waist_motor_id;
-   int femur_motor_id;
-   int tibia_motor_id;
-
-   #if _POSIXENABLE == 1
-   string waist_motor_id;
-   string femur_motor_id;
-   string tibia_motor_id;
-   #endif
 
 public:
     
     leg_index leg_i;
+    leg_phase phase;
     
-    Leg(  leg_index _leg_i, 
-          uint8_t _waist_motor_id,
-          uint8_t _femur_motor_id,
-          uint8_t _tibia_motor_id,
-          int _waist_offset,
-          int _femur_offset,
-          int _tibia_offset);
+    Leg(leg_index _leg_i);
     //#endif
           
     void compute_IK_XYZ(float x, float y, float z, float row, float pitch, float yaw);
+    void compute_swing(STATE state);
+    void compute_stance(STATE state);
 
     #if _MCUENABLE == 1
     //void motor(float hipAngle, float femurAngle, float tibiaAngle);
@@ -125,6 +119,7 @@ public:
     float tibiaAngle;
     
 };
+
 extern Leg leg_FL;
 extern Leg leg_FR;
 extern Leg leg_BL;
