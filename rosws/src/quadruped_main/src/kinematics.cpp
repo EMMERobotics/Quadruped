@@ -7,7 +7,7 @@
 #define RATE 6 //Hz
 #define STILLTIME 0.3
 
-int STEP_SIZE = 40;
+int STEP_SIZE;
 #define STEP_SIZE_Y 30
 #define STEP_HEIGHT 40
 #define N_TICKS 100 // number of ticks per cycle
@@ -47,6 +47,9 @@ Leg::Leg(leg_index _leg_i)
 
 void Leg::compute_IK_XYZ(float x, float y, float z, float roll, float pitch, float yaw) {
 
+	std::cout << "x: %f" << x << std::endl;
+	std::cout << "y:    %f" << y << std::endl;
+	std::cout << "z:       %f" << z << std::endl;
 	float y_roll;
 	float z_roll;
 	float x_pitch;
@@ -167,7 +170,9 @@ void Leg::compute_stance(STATE state) {
 
     //x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
     //y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100);
-   
+    
+	std::cout << "tic:       " << state.ticks << std::endl;
+
     switch (state.exphase)
     {
 
@@ -241,7 +246,7 @@ void Leg::compute_swing(STATE state) {
 
 Leg leg_FL(FL);    //tibia offset
 Leg leg_FR(FR);
-Leg leg_BL(BL;
+Leg leg_BL(BL);
 Leg leg_BR(BackR);
 
 
@@ -332,15 +337,17 @@ void gait_controller(STATE &state) {
         }
         else if (state.com_vx > 127) {
             state.comphase = TROT;
+	    STEP_SIZE = 40;
         }
 
         else if (state.com_vx < 127) {
             state.comphase = TROT;
-            STEP_SIZE *= -1;
+            STEP_SIZE = -40;
         }
 
         if (state.exphase == STILL && state.comphase == TROT) {
-            state.exphase = STEP_TROT;
+		//std::cout << "+++++++++++++++++++++++STEP+++++++++++++++++++++++" << std::endl;
+		state.exphase = STEP_TROT;
         }
 
         else if (state.comphase == TROT && state.exphase == STEP_TROT && state.ticks > 90) {
@@ -358,23 +365,23 @@ void gait_controller(STATE &state) {
         if (state.ticks == 100) {
             state.ticks = 0;
             state.pairs = !state.pairs;
+        }
 
-            if (state.pairs) {
+	if (state.pairs) {
                 leg_FL.compute_swing(state);
                 leg_BR.compute_swing(state);
                 leg_FR.compute_stance(state);
                 leg_BL.compute_stance(state);            
             }
 
-            else {
+         else {
                 leg_FL.compute_stance(state);
                 leg_BR.compute_stance(state);
                 leg_FR.compute_swing(state);
                 leg_BL.compute_swing(state);
             }
-        }
 
-
+/*
     case CRAWL:
         if (state.com_vx == 127) {
             state.comphase = STILL;
@@ -386,7 +393,7 @@ void gait_controller(STATE &state) {
             state.exphase = STEP_CRAWL;
         }
 
-        else if (state.comphase == CRAWL && state.exphase == STEP_CRAWL && state.ticks > 90) {
+        else if (state.comphase == CRAWL_DIS && state.exphase == STEP_CRAWL && state.ticks > 90) {
             state.exphase = CRAWL_DIS;
         }
 
@@ -399,9 +406,9 @@ void gait_controller(STATE &state) {
         }
 
     case RPY:
-
-    default:
-        state.exphase = STILL;
+*/
+    //default:
+        //state.exphase = STILL;
 
     }
 

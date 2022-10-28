@@ -6,7 +6,7 @@
 #include <quadruped_main/con_msg.h>
 
 //#define DEBUG
-#define VERBOSE
+//#define VERBOSE
 
 
 STATE robot_state = { 
@@ -27,7 +27,6 @@ STATE robot_state = {
     .p_z = 0,
 
     .ticks = 0,
-    .mode = 0,
     .pairs = true,
 
     .com_vx = 0,
@@ -64,10 +63,10 @@ void joy_callback(const quadruped_main::con_msg::ConstPtr& msg) {
   #endif
 
   #ifdef DEBUG
-    ROS_INFO("Value x1 is: [%i]", msg->val_x1);
-    ROS_INFO("Value x1 is: [%i]", msg->val_y1);
-    ROS_INFO("Value x2 is: [%i]", msg->val_x2);
-    ROS_INFO("Value y2 is: [%i]", msg->val_y2);
+    //ROS_INFO("Value x1 is: [%i]", msg->val_x1);
+    //ROS_INFO("Value x1 is: [%i]", msg->val_y1);
+    //ROS_INFO("Value x2 is: [%i]", msg->val_x2);
+    //ROS_INFO("Value y2 is: [%i]", msg->val_y2);
   #endif
 
   robot_state.com_vx = msg->val_y1;
@@ -109,13 +108,18 @@ int main(int argc, char **argv)
     parse_motor_command(motor_comm_pub, leg_BR);
 
     #ifdef DEBUG
-    ROS_INFO("%f", motor_command.x);
-    ROS_INFO("ex: %d", robot_state.exphase);
-    //ROS_INFO("com:    %d", robot_state.comphase);
-    ROS_INFO("tickks:     %d", robot_state.ticks);
+    //ROS_INFO("ex: %d", robot_state.exphase);
+    //ROS_INFO("ph: %d", robot_state.mode);
+    ROS_INFO("ex:    %d", robot_state.exphase);
+    ROS_INFO("tic:    %d", robot_state.ticks);
+    ROS_INFO("HIP:       %f", leg_FL.hipAngle);
+    ROS_INFO("FEM:         %f", leg_FL.femurAngle);
+    ROS_INFO("TIB:            %f", leg_FL.tibiaAngle);
+
+
+    //ROS_INFO("tickks:     %d", robot_state.ticks);
     //ROS_INFO("pairs:           %d", robot_state.pairs);
     #endif
-
     ros::spinOnce();
     loop_rate.sleep();
     

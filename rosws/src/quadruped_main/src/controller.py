@@ -39,7 +39,7 @@ def deadzone(val, center, range):
 def joystick():
     pub = rospy.Publisher('joy_val', con_msg, queue_size=10)
     rospy.init_node('joystick', anonymous=True)
-    rate = rospy.Rate(10) # 10hz
+    rate = rospy.Rate(100) # 10hz
 
     while not rospy.is_shutdown():
         #read value from controller
@@ -65,7 +65,7 @@ def joystick():
                 if event.code == 303:
                     msg.b_sq = event.value
 
-        #rospy.loginfo(con_msg.val_y2)
+        #rospy.loginfo(msg.b_x)
         pub.publish(msg)
         rate.sleep()
 
