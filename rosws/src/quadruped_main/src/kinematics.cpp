@@ -1,5 +1,6 @@
 #include "kinematics/kinematics.h"
 #include <iostream>
+#include <stdio.h>
 #define PI 3.14159
 
 //============ GAIT PARAMS =============================================
@@ -7,8 +8,8 @@
 #define RATE 6 //Hz
 #define STILLTIME 0.3
 
-int STEP_SIZE;
-int STEP_SIZE_CRAWL;
+float STEP_SIZE;
+float STEP_SIZE_CRAWL;
 #define CRAWL_RATE 2
 #define STEP_SIZE_Y 30
 #define STEP_HEIGHT 40
@@ -193,9 +194,13 @@ void Leg::compute_stance(STATE &state) {
 		if (current_x >= STEP_SIZE_CRAWL/2) {
 			current_x = STEP_SIZE_CRAWL/2;
 			if (state.comphase == STILL) state.crawl_completed = true;
-			if (state.crawlphase == BD2) state.crawlphase = BACK_LEFT;
-			else { 
+			switch (state.crawlphase) {
+			case BD1:
+				state.crawlphase = BACK_LEFT;
+			break;
+			case BD2: 
 				state.crawlphase = BACK_RIGHT;
+			break;
 			}
 		}
 	break;
@@ -250,10 +255,10 @@ void Leg::compute_swing(STATE &state) {
 		if (current_x <= -STEP_SIZE_CRAWL/2) {
 			current_x = -STEP_SIZE_CRAWL/2;
             switch (state.crawlphase) {
-			case state.crawlphase == BACK_RIGHT:
+			case BACK_RIGHT:
                 state.crawlphase = FRONT_RIGHT;
             break;
-            case state.crawlphase == FRONT_RIGHT:
+            case FRONT_RIGHT:
                 state.crawlphase = BD1;
                 state.crawl_completed = true;
             break;
@@ -268,16 +273,16 @@ void Leg::compute_swing(STATE &state) {
 		if (current_x <= -STEP_SIZE_CRAWL/2) {
 			current_x = -STEP_SIZE_CRAWL/2;
             switch (state.crawlphase) {
-			case state.crawlphase == BACK_RIGHT:
+			case BACK_RIGHT:
                 state.crawlphase = FRONT_RIGHT;
             break;
-            case state.crawlphase == FRONT_RIGHT:
+            case FRONT_RIGHT:
                 state.crawlphase = BD1;
             break;
-            case state.crawlphase == BACK_LEFT:
+            case BACK_LEFT:
                 state.crawlphase = FRONT_LEFT;
             break;
-            case state.crawlphase == FRONT_LEFT:
+            case FRONT_LEFT:
                 state.crawlphase = BD2;
             break;
             }
@@ -291,17 +296,17 @@ void Leg::compute_swing(STATE &state) {
 		if (current_x <= 0) {
 			current_x = 0;
             switch (state.crawlphase) {
-			case state.crawlphase == BACK_RIGHT:
+			case BACK_RIGHT:
                 state.crawlphase = FRONT_RIGHT;
             break;
-            case state.crawlphase == FRONT_RIGHT:
+            case FRONT_RIGHT:
                 state.crawlphase = BACK_RIGHT;
                 state.crawl_completed = true;
             break;
-            case state.crawlphase == BACK_LEFT:
+            case BACK_LEFT:
                 state.crawlphase = FRONT_LEFT;
             break;
-            case state.crawlphase == FRONT_LEFT:
+            case FRONT_LEFT:
                 state.crawlphase = BACK_RIGHT;
                 state.crawl_completed == true;
             break;
@@ -315,7 +320,7 @@ void Leg::compute_swing(STATE &state) {
 	    current_z = 0;
         break;
     }
-    
+    printf("z:          %f", current_z);
     compute_IK_XYZ(current_x, current_y, current_z, 0, 0, 0);
 }
 
@@ -389,7 +394,7 @@ void gait_controller(STATE &state) {
     float period_x; //ms for 1 cycle
     float ms_per_ticks;
 
-    if (state.exphase == TROT || state.exphase == STEP_TROT || state.exphase == STOP_TROT) {
+    if (state.exphase == TROT || state.exphase == STEP_TROT || state.exphase == STOP_TROT ) {
         //period_x = 1000 * STEP_SIZE/state.c_x;
         period_x = 1000 * 1/RATE;
         ms_per_ticks = period_x / N_TICKS;
@@ -400,7 +405,7 @@ void gait_controller(STATE &state) {
 
 	else if (state.exphase == CRAWL_DIS || state.exphase == STEP_CRAWL || state.exphase == STOP_CRAWL) {
         //period_x = 1000 * STEP_SIZE/state.c_x;
-        period_x = 1000 * 1/RATE;
+        period_x = 1000 * 1/CRAWL_RATE;
         ms_per_ticks = period_x / N_TICKS;
         incremented_ticks = ceil(state.dt/ ms_per_ticks); //ceil or floor works better???
         state.ticks += incremented_ticks;
@@ -519,9 +524,10 @@ void gait_controller(STATE &state) {
             leg_BL.compute_stance(state);
 		break;
 		}
-
+	if (state.ticks == 100) {
+            state.ticks = 0;
+        }
 	break;
-
     case RPY:
 	break;
 
