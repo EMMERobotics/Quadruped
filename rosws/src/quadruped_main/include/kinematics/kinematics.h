@@ -44,6 +44,15 @@ enum robot_mode {
     CRAWL
 };
 
+enum crawl_phase {
+    BACK_RIGHT,
+    FRONT_RIGHT,
+    BD1,
+    BACK_LEFT,
+    FRONT_LEFT,
+    BD2
+}
+
 typedef struct state {
 
     int dt;
@@ -75,6 +84,8 @@ typedef struct state {
     robot_phase comphase;
 
     robot_mode mode;
+    crawl_phase crawlphase;
+    bool crawl_completed;
     
 } STATE;
 

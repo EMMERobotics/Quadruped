@@ -8,6 +8,8 @@
 #define STILLTIME 0.3
 
 int STEP_SIZE;
+int STEP_SIZE_CRAWL;
+#define CRAWL_RATE 2
 #define STEP_SIZE_Y 30
 #define STEP_HEIGHT 40
 #define N_TICKS 100 // number of ticks per cycle
@@ -47,9 +49,9 @@ Leg::Leg(leg_index _leg_i)
 
 void Leg::compute_IK_XYZ(float x, float y, float z, float roll, float pitch, float yaw) {
 
-	std::cout << "x: %f" << x << std::endl;
-	std::cout << "y:    %f" << y << std::endl;
-	std::cout << "z:       %f" << z << std::endl;
+	//std::cout << "x: " << x << std::endl;
+	//std::cout << "y:    " << y << std::endl;
+	//std::cout << "z:       " << z << std::endl;
 	float y_roll;
 	float z_roll;
 	float x_pitch;
@@ -126,7 +128,6 @@ void Leg::compute_IK_XYZ(float x, float y, float z, float roll, float pitch, flo
         y *= -1;
     }
 
-    //only x,y,z, for now
     float l4_sqrt;
     float l3_x0_sqrt;
     float l3_sqrt;
@@ -155,7 +156,7 @@ void Leg::compute_IK_XYZ(float x, float y, float z, float roll, float pitch, flo
     tibiaAngle = PI - phi; // new leg design
 }
 
-void Leg::compute_stance(STATE state) {
+void Leg::compute_stance(STATE &state) {
     /*
     GOALS:
         Compute the (X,Y,Z,R,P,Y) of each leg from the phase ticks for the stance legs
@@ -168,38 +169,45 @@ void Leg::compute_stance(STATE state) {
         (X,Y,Z,R,P,Y) for each stance legs
     */
 
-    //x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
-    //y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100);
-    
-	std::cout << "tic:       " << state.ticks << std::endl;
+   float incremental_x;
 
     switch (state.exphase)
     {
 
     case STEP_TROT:
-        current_x = 0 - (STEP_SIZE*state.ticks/200); 
-        break;
+        current_x = STEP_SIZE*state.ticks/200; 
+    break;
     
     case STOP_TROT:
-        current_x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/200);
-        break;
+        current_x = (STEP_SIZE*state.ticks/200) - STEP_SIZE/2;
+    break;
     
     case TROT:
-        current_x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
+        current_x = (STEP_SIZE*state.ticks/100) - STEP_SIZE/2;
         //y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100); 
-        break;
+    break;
+
+	case CRAWL_DIS: //START and STOP steps are not execute in stance
+		incremental_x = STEP_SIZE_CRAWL*CRAWL_RATE/200;
+		current_x += incremental_x;
+		if (current_x >= STEP_SIZE_CRAWL/2) {
+			current_x = STEP_SIZE_CRAWL/2;
+			if (state.comphase == STILL) state.craw_completed = true;
+			if (state.crawlphase == BD2) state.crawlphase == BACK_LEFT;
+			else state.crawlphase += 1;
+		}
+	break;
 
     default:
         current_x = 0;
 	    current_y = 0;
 	    current_z = 0;
-        break;
     }
 
     compute_IK_XYZ(current_x, current_y, 0, 0, 0, 0);
 }
 
-void Leg::compute_swing(STATE state) {
+void Leg::compute_swing(STATE &state) {
     /*
     GOALS:
         Compute the (X,Y,Z,R,P,Y) of each leg from the phase ticks for the swing legs
@@ -212,25 +220,58 @@ void Leg::compute_swing(STATE state) {
         (X,Y,Z,R,P,Y) for each swing legs
     */
 
-    //float y = (STEP_SIZE_Y*state.ticks/200) - (STEP_SIZE_Y/4);
-    //float z = STEP_HEIGHT*sin(state.ticks*(PI/100));
+   float incremental_x;
 
     switch (state.exphase)
     {
+
     case STEP_TROT:
-        current_x = (STEP_SIZE*state.ticks/400);
+        current_x = 0 - (STEP_SIZE*state.ticks/400);
 	    current_z = STEP_HEIGHT*sin(state.ticks*(PI/100));
         break;
     
     case STOP_TROT:
-        current_x = (STEP_SIZE*state.ticks/400) - (STEP_SIZE/4); 
+        current_x = (STEP_SIZE/4) - (STEP_SIZE*state.ticks/400); 
 	    current_z = STEP_HEIGHT*sin(state.ticks*(PI/100));
         break;
 
     case TROT:
-        current_x = (STEP_SIZE*state.ticks/200) - (STEP_SIZE/4); 
+        current_x = (STEP_SIZE/4) - (STEP_SIZE*state.ticks/200); 
 	    current_z = STEP_HEIGHT*sin(state.ticks*(PI/100));
         break;
+
+	//current z corelation for crawling
+	case STEP_CRAWL:
+		current_z = STEP_HEIGHT*sin(state.ticks*(PI/100));
+		incremental_x = STEP_SIZE_CRAWL*CRAWL_RATE/200;
+		current_x -= incremental_x;
+		if (current_x <= -STEP_SIZE_CRAWL/2) {
+			current_x = -STEP_SIZE_CRAWL/2;
+			if (state.crawlphase == FRONT_LEFT) state.crawl_completed == true;
+			state.crawlphase += 1;
+		}
+	break;
+			
+	case CRAWL_DIS:
+		current_z = STEP_HEIGHT*sin(state.ticks*(PI/100));
+		incremental_x = STEP_SIZE_CRAWL*CRAWL_RATE/100;
+		current_x -= incremental_x;
+		if (current_x <= -STEP_SIZE_CRAWL/2) {
+			current_x = -STEP_SIZE_CRAWL/2;
+			state.crawlphase += 1;
+		}
+	break;
+	
+	case STOP_CRAWL:
+		current_z = STEP_HEIGHT*sin(state.ticks*(PI/100));
+		incremental_x = STEP_SIZE_CRAWL*CRAWL_RATE/200;
+		current_x -= incremental_x;
+		if (current_x <= 0) {
+			current_x = 0;
+			if (state.crawlphase == FRONT_LEFT) state.crawl_completed == true;
+			state.crawlphase += 1;
+		}
+	break;
     
     default:
         current_x = 0;
@@ -240,7 +281,6 @@ void Leg::compute_swing(STATE state) {
     }
     
     compute_IK_XYZ(current_x, current_y, current_z, 0, 0, 0);
-
 }
 
 
@@ -259,7 +299,6 @@ float map(float val, int min_old, int max_old, float min_new, float max_new) {
     new_val = val/(max_old-min_old) * (max_new-min_new) + min_new;
     return new_val;
 }
-
 
 void test_rpy(STATE state) {
 
@@ -310,12 +349,11 @@ void gait_controller(STATE &state) {
 
     */
 
-    if (state.exphase == TROT || state.exphase == STEP_TROT || state.exphase == STOP_TROT) {
-        
-        float incremented_ticks;
-        float period_x; //ms for 1 cycle
-        float ms_per_ticks;
+    float incremented_ticks;
+    float period_x; //ms for 1 cycle
+    float ms_per_ticks;
 
+    if (state.exphase == TROT || state.exphase == STEP_TROT || state.exphase == STOP_TROT) {
         //period_x = 1000 * STEP_SIZE/state.c_x;
         period_x = 1000 * 1/RATE;
         ms_per_ticks = period_x / N_TICKS;
@@ -323,6 +361,16 @@ void gait_controller(STATE &state) {
         state.ticks += incremented_ticks;
         if (state.ticks > N_TICKS) state.ticks = N_TICKS;
     }
+
+	else if (state.exphase == CRAWL_DIS || state.exphase == STEP_CRAWL || state.expahse == STOP_CRAWL) {
+        //period_x = 1000 * STEP_SIZE/state.c_x;
+        period_x = 1000 * 1/RATE;
+        ms_per_ticks = period_x / N_TICKS;
+        incremented_ticks = ceil(state.dt/ ms_per_ticks); //ceil or floor works better???
+        state.ticks += incremented_ticks;
+        if (state.ticks > N_TICKS) state.ticks = N_TICKS;
+
+	}
 
     else {
         state.ticks = 0;
@@ -346,7 +394,6 @@ void gait_controller(STATE &state) {
         }
 
         if (state.exphase == STILL && state.comphase == TROT) {
-		//std::cout << "+++++++++++++++++++++++STEP+++++++++++++++++++++++" << std::endl;
 		state.exphase = STEP_TROT;
         }
 
@@ -367,55 +414,89 @@ void gait_controller(STATE &state) {
             state.pairs = !state.pairs;
         }
 
-	if (state.pairs) {
+	    if (state.pairs) {
                 leg_FL.compute_swing(state);
                 leg_BR.compute_swing(state);
                 leg_FR.compute_stance(state);
                 leg_BL.compute_stance(state);            
-            }
+        }
 
-         else {
+        else {
                 leg_FL.compute_stance(state);
                 leg_BR.compute_stance(state);
                 leg_FR.compute_swing(state);
                 leg_BL.compute_swing(state);
-            }
+        }
+	break;
 
-/*
     case CRAWL:
         if (state.com_vx == 127) {
             state.comphase = STILL;
         }
         else {
-            state.comphase = CRAWL_DIS;
+            state.comphase = CRAWL_DIS; 
+            STEP_SIZE_CRAWL = 40;
         }
+
         if (state.exphase == STILL && state.comphase == CRAWL_DIS) {
             state.exphase = STEP_CRAWL;
         }
 
-        else if (state.comphase == CRAWL_DIS && state.exphase == STEP_CRAWL && state.ticks > 90) {
+        else if (state.comphase == CRAWL_DIS && state.exphase == STEP_CRAWL && state.crawl_completed == true) {
+			state.crawl_completed = false;
             state.exphase = CRAWL_DIS;
         }
 
-        else if (state.comphase == STILL && state.exphase == CRAWL_DIS  && state.ticks > 90) {
+        else if (state.comphase == STILL && state.exphase == CRAWL_DIS && state.crawl_completed == true) {
+			state.crawl_completed = false;
             state.exphase = STOP_CRAWL;
         }
 
-        else if (state.comphase == STILL && state.exphase == STOP_CRAWL  && state.ticks > 90) {
+        else if (state.comphase == STILL && state.exphase == STOP_CRAWL && state.crawl_completed == true) {
+			state.crawl_completed = false;
             state.exphase = STILL;
         }
 
-    case RPY:
-*/
-    //default:
-        //state.exphase = STILL;
+		switch (state.crawphase) {
+		case BACK_LEFT:
+			leg_BL.compute_swing(state);
+		break;
+		case FRONT_LEFT:
+			leg_FL.compute_swing(state);
+		break;
+		case BD1:
+			leg_FL.compute_stance(state);
+            leg_BR.compute_stance(state);
+            leg_FR.compute_stance(state);
+            leg_BL.compute_stance(state);
+		break;
+		case BACK_RIGHT:
+			leg_BR.compute_swing(state);
+		break;
+		case FRONT_RIGHT:
+			leg_FR.compute_swing(state);
+		break;
+		case BD2:
+			leg_FL.compute_stance(state);
+            leg_BR.compute_stance(state);
+            leg_FR.compute_stance(state);
+            leg_BL.compute_stance(state);
+		break;
+		}
 
-    }
+	break;
+
+    case RPY:
+	break;
+
+    default:
+        state.exphase = STILL;
 
     //test_rpy(state);
 
     //static_trot(state);
     //stand(state);
+	}
 }
 
 float exec_tick = N_TICKS - STILLTIME*N_TICKS;

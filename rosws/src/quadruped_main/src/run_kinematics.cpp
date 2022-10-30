@@ -37,7 +37,9 @@ STATE robot_state = {
     .exphase = STILL,
     .comphase = STILL,
 
-    .mode = NORM
+    .mode = NORM,
+    .crawlphase = 0,
+    .crawl_completed = false
 
 };
 
