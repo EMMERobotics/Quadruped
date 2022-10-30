@@ -195,7 +195,7 @@ void Leg::compute_stance(STATE &state) {
 			if (state.comphase == STILL) state.crawl_completed = true;
 			if (state.crawlphase == BD2) state.crawlphase = BACK_LEFT;
 			else { 
-				state.crawlphase = state.crawlphase + 1;
+				state.crawlphase = BACK_RIGHT;
 			}
 		}
 	break;
@@ -249,8 +249,15 @@ void Leg::compute_swing(STATE &state) {
 		current_x -= incremental_x;
 		if (current_x <= -STEP_SIZE_CRAWL/2) {
 			current_x = -STEP_SIZE_CRAWL/2;
-			if (state.crawlphase == FRONT_LEFT) state.crawl_completed = true;
-			state.crawlphase = state.crawlphase + 1;
+            switch (state.crawlphase) {
+			case state.crawlphase == BACK_RIGHT:
+                state.crawlphase = FRONT_RIGHT;
+            break;
+            case state.crawlphase == FRONT_RIGHT:
+                state.crawlphase = BD1;
+                state.crawl_completed = true;
+            break;
+            }
 		}
 	break;
 			
@@ -260,7 +267,20 @@ void Leg::compute_swing(STATE &state) {
 		current_x -= incremental_x;
 		if (current_x <= -STEP_SIZE_CRAWL/2) {
 			current_x = -STEP_SIZE_CRAWL/2;
-			state.crawlphase = state.crawlphase + 1;
+            switch (state.crawlphase) {
+			case state.crawlphase == BACK_RIGHT:
+                state.crawlphase = FRONT_RIGHT;
+            break;
+            case state.crawlphase == FRONT_RIGHT:
+                state.crawlphase = BD1;
+            break;
+            case state.crawlphase == BACK_LEFT:
+                state.crawlphase = FRONT_LEFT;
+            break;
+            case state.crawlphase == FRONT_LEFT:
+                state.crawlphase = BD2;
+            break;
+            }
 		}
 	break;
 	
@@ -270,8 +290,22 @@ void Leg::compute_swing(STATE &state) {
 		current_x -= incremental_x;
 		if (current_x <= 0) {
 			current_x = 0;
-			if (state.crawlphase == FRONT_LEFT) state.crawl_completed == true;
-			state.crawlphase = state.crawlphase + 1;
+            switch (state.crawlphase) {
+			case state.crawlphase == BACK_RIGHT:
+                state.crawlphase = FRONT_RIGHT;
+            break;
+            case state.crawlphase == FRONT_RIGHT:
+                state.crawlphase = BACK_RIGHT;
+                state.crawl_completed = true;
+            break;
+            case state.crawlphase == BACK_LEFT:
+                state.crawlphase = FRONT_LEFT;
+            break;
+            case state.crawlphase == FRONT_LEFT:
+                state.crawlphase = BACK_RIGHT;
+                state.crawl_completed == true;
+            break;
+            }  
 		}
 	break;
     
