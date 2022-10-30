@@ -192,9 +192,11 @@ void Leg::compute_stance(STATE &state) {
 		current_x += incremental_x;
 		if (current_x >= STEP_SIZE_CRAWL/2) {
 			current_x = STEP_SIZE_CRAWL/2;
-			if (state.comphase == STILL) state.craw_completed = true;
-			if (state.crawlphase == BD2) state.crawlphase == BACK_LEFT;
-			else state.crawlphase += 1;
+			if (state.comphase == STILL) state.crawl_completed = true;
+			if (state.crawlphase == BD2) state.crawlphase = BACK_LEFT;
+			else { 
+				state.crawlphase = state.crawlphase + 1;
+			}
 		}
 	break;
 
@@ -247,8 +249,8 @@ void Leg::compute_swing(STATE &state) {
 		current_x -= incremental_x;
 		if (current_x <= -STEP_SIZE_CRAWL/2) {
 			current_x = -STEP_SIZE_CRAWL/2;
-			if (state.crawlphase == FRONT_LEFT) state.crawl_completed == true;
-			state.crawlphase += 1;
+			if (state.crawlphase == FRONT_LEFT) state.crawl_completed = true;
+			state.crawlphase = state.crawlphase + 1;
 		}
 	break;
 			
@@ -258,7 +260,7 @@ void Leg::compute_swing(STATE &state) {
 		current_x -= incremental_x;
 		if (current_x <= -STEP_SIZE_CRAWL/2) {
 			current_x = -STEP_SIZE_CRAWL/2;
-			state.crawlphase += 1;
+			state.crawlphase = state.crawlphase + 1;
 		}
 	break;
 	
@@ -269,7 +271,7 @@ void Leg::compute_swing(STATE &state) {
 		if (current_x <= 0) {
 			current_x = 0;
 			if (state.crawlphase == FRONT_LEFT) state.crawl_completed == true;
-			state.crawlphase += 1;
+			state.crawlphase = state.crawlphase + 1;
 		}
 	break;
     
@@ -362,7 +364,7 @@ void gait_controller(STATE &state) {
         if (state.ticks > N_TICKS) state.ticks = N_TICKS;
     }
 
-	else if (state.exphase == CRAWL_DIS || state.exphase == STEP_CRAWL || state.expahse == STOP_CRAWL) {
+	else if (state.exphase == CRAWL_DIS || state.exphase == STEP_CRAWL || state.exphase == STOP_CRAWL) {
         //period_x = 1000 * STEP_SIZE/state.c_x;
         period_x = 1000 * 1/RATE;
         ms_per_ticks = period_x / N_TICKS;
@@ -457,7 +459,7 @@ void gait_controller(STATE &state) {
             state.exphase = STILL;
         }
 
-		switch (state.crawphase) {
+		switch (state.crawlphase) {
 		case BACK_LEFT:
 			leg_BL.compute_swing(state);
 		break;

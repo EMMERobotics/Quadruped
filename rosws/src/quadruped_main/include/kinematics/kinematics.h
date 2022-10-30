@@ -51,7 +51,7 @@ enum crawl_phase {
     BACK_LEFT,
     FRONT_LEFT,
     BD2
-}
+};
 
 typedef struct state {
 
@@ -115,8 +115,8 @@ public:
     //#endif
           
     void compute_IK_XYZ(float x, float y, float z, float row, float pitch, float yaw);
-    void compute_swing(STATE state);
-    void compute_stance(STATE state);
+    void compute_swing(STATE &state);
+    void compute_stance(STATE &state);
 
     #if _MCUENABLE == 1
     //void motor(float hipAngle, float femurAngle, float tibiaAngle);
