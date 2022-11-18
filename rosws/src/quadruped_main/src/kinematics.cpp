@@ -5,12 +5,13 @@
 
 //============ GAIT PARAMS =============================================
 //special macros for testing
-#define RATE 6 //Hz
+
+#define RATE 4 //Hz
 #define STILLTIME 0.3
 
 float STEP_SIZE;
 float STEP_SIZE_CRAWL;
-#define CRAWL_RATE 2
+#define CRAWL_RATE 1
 #define STEP_SIZE_Y 30
 #define STEP_HEIGHT 40
 #define N_TICKS 100 // number of ticks per cycle
@@ -190,19 +191,18 @@ void Leg::compute_stance(STATE &state) {
 
 	case CRAWL_DIS: //START and STOP steps are not execute in stance
 		incremental_x = STEP_SIZE_CRAWL*CRAWL_RATE/200;
-		current_x += incremental_x;
-		if (current_x >= STEP_SIZE_CRAWL/2) {
-			current_x = STEP_SIZE_CRAWL/2;
+		current_x -= incremental_x;
+		printf("x:  %f\n", current_x); 
+		if (state.crawlphase == BD1 && leg_i == 2 && current_x <= -STEP_SIZE_CRAWL/2) {
+			current_x = -STEP_SIZE_CRAWL/2;
+			state.crawlphase = BACK_LEFT;
 			if (state.comphase == STILL) state.crawl_completed = true;
-			switch (state.crawlphase) {
-			case BD1:
-				state.crawlphase = BACK_LEFT;
-			break;
-			case BD2: 
-				state.crawlphase = BACK_RIGHT;
-			break;
 			}
-		}
+		else if(state.crawlphase == BD2 && leg_i == 3 && current_x <= -STEP_SIZE_CRAWL/2)  {
+			current_x = -STEP_SIZE_CRAWL/2;
+			state.crawlphase = BACK_RIGHT;
+			if (state.comphase == STILL) state.crawl_completed = true;
+			}
 	break;
 
     default:
@@ -250,10 +250,11 @@ void Leg::compute_swing(STATE &state) {
 	//current z corelation for crawling
 	case STEP_CRAWL:
 		current_z = STEP_HEIGHT*sin(state.ticks*(PI/100));
-		incremental_x = STEP_SIZE_CRAWL*CRAWL_RATE/200;
-		current_x -= incremental_x;
-		if (current_x <= -STEP_SIZE_CRAWL/2) {
-			current_x = -STEP_SIZE_CRAWL/2;
+		current_x = STEP_SIZE*state.ticks/200;
+		printf("========================================\n");
+		printf("x: %f\n", current_x);
+		printf("z: %f\n", current_z);
+		if (state.ticks >= 100) {
             switch (state.crawlphase) {
 			case BACK_RIGHT:
                 state.crawlphase = FRONT_RIGHT;
@@ -268,10 +269,8 @@ void Leg::compute_swing(STATE &state) {
 			
 	case CRAWL_DIS:
 		current_z = STEP_HEIGHT*sin(state.ticks*(PI/100));
-		incremental_x = STEP_SIZE_CRAWL*CRAWL_RATE/100;
-		current_x -= incremental_x;
-		if (current_x <= -STEP_SIZE_CRAWL/2) {
-			current_x = -STEP_SIZE_CRAWL/2;
+		current_x = (STEP_SIZE/2) - (STEP_SIZE*state.ticks/100); 
+		if (state.ticks >= 100) {
             switch (state.crawlphase) {
 			case BACK_RIGHT:
                 state.crawlphase = FRONT_RIGHT;
@@ -291,10 +290,8 @@ void Leg::compute_swing(STATE &state) {
 	
 	case STOP_CRAWL:
 		current_z = STEP_HEIGHT*sin(state.ticks*(PI/100));
-		incremental_x = STEP_SIZE_CRAWL*CRAWL_RATE/200;
-		current_x -= incremental_x;
-		if (current_x <= 0) {
-			current_x = 0;
+		current_x = (STEP_SIZE/2) - (STEP_SIZE*state.ticks/200); 
+		if (state.ticks >= 100) {
             switch (state.crawlphase) {
 			case BACK_RIGHT:
                 state.crawlphase = FRONT_RIGHT;
@@ -320,7 +317,6 @@ void Leg::compute_swing(STATE &state) {
 	    current_z = 0;
         break;
     }
-    printf("z:          %f", current_z);
     compute_IK_XYZ(current_x, current_y, current_z, 0, 0, 0);
 }
 
@@ -476,7 +472,7 @@ void gait_controller(STATE &state) {
         }
         else {
             state.comphase = CRAWL_DIS; 
-            STEP_SIZE_CRAWL = 40;
+            STEP_SIZE_CRAWL = 80;
         }
 
         if (state.exphase == STILL && state.comphase == CRAWL_DIS) {

@@ -5,7 +5,7 @@
 #include "kinematics/kinematics.h"
 #include <quadruped_main/con_msg.h>
 
-#define DEBUG
+//#define DEBUG
 //#define VERBOSE
 
 
@@ -37,7 +37,7 @@ STATE robot_state = {
     .exphase = STILL,
     .comphase = STILL,
 
-    .mode = CRAWL,
+    .mode = NORM,
     .crawlphase = BACK_RIGHT,
     .crawl_completed = false
 
