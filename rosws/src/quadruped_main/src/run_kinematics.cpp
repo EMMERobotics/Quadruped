@@ -5,7 +5,7 @@
 #include "kinematics/kinematics.h"
 #include <quadruped_main/con_msg.h>
 
-//#define DEBUG
+#define DEBUG
 //#define VERBOSE
 
 
@@ -111,13 +111,13 @@ int main(int argc, char **argv)
 
     #ifdef DEBUG
     ROS_INFO("com: %d", robot_state.comphase);
-    //ROS_INFO("ph: %d", robot_state.mode);
+    ROS_INFO("ph: %d", robot_state.mode);
     ROS_INFO("ex:    %d", robot_state.exphase);
     ROS_INFO("tic:    %d", robot_state.ticks);
     //ROS_INFO("HIP:       %f", leg_FL.hipAngle);
     //ROS_INFO("FEM:         %f", leg_FL.femurAngle);
     //ROS_INFO("TIB:            %f", leg_FL.tibiaAngle);
-    ROS_INFO("CRAWL:    %d", robot_state.crawlphase);
+    //ROS_INFO("CRAWL:    %d", robot_state.crawlphase);
     //ROS_INFO("pairs:           %d", robot_state.pairs);
     #endif
     ros::spinOnce();

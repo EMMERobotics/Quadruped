@@ -68,7 +68,7 @@ def joystick():
                 depress = True
             elif event.type == 1 and depress == True:
                 depress = False
-        #rospy.loginfo(msg.b_x)
+        rospy.loginfo(msg.b_x)
         pub.publish(msg)
         rate.sleep()
 

@@ -445,17 +445,17 @@ void gait_controller(STATE &state) {
             }
 
             if (state.com_vy > 127) {
-                STEP_SIZE_Y = 20;
+                STEP_SIZE_Y = 40;
             }
             else if (state.com_vy < 127) {
-                STEP_SIZE_Y = -20;
+                STEP_SIZE_Y = -40;
             }
 
             if (state.com_vz > 127) {
-                STEP_SIZE_YAW = 0.17453;
+                STEP_SIZE_YAW = PI/9;
             }
             else if (state.com_vz < 127) {
-                STEP_SIZE_YAW = -0.17453;
+                STEP_SIZE_YAW = -PI/9;
             }
         }
         

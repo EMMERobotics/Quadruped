@@ -105,7 +105,8 @@ class Leg {
    float current_x;
    float current_y;
    float current_z;
-
+   float current_yaw;
+   
 public:
     
     leg_index leg_i;
