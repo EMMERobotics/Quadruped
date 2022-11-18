@@ -9,7 +9,7 @@
 
 #define STEP_SIZE 40
 #define STEP_SIZE_Y 20
-#define STEP_SIZE_YAW 20
+#define STEP_SIZE_YAW 0.17453
 #define STEP_HEIGHT 40
 #define N_TICKS 100 // number of ticks per cycle
 
