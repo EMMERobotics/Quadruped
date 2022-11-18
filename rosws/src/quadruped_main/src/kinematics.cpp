@@ -351,7 +351,7 @@ float map(float val, int min_old, int max_old, float min_new, float max_new) {
     return new_val;
 }
 
-void test_rpy(STATE state) {
+void rpy(STATE state) {
 
     float x = 0;
     float y = 0;
@@ -555,12 +555,11 @@ void gait_controller(STATE &state) {
         }
 	break;
     case RPY:
+        rpy(state);
 	break;
 
     default:
         state.exphase = STILL;
-
-    //test_rpy(state);
 
     //static_trot(state);
     //stand(state);
