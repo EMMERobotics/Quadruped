@@ -8,7 +8,8 @@
 #define STILLTIME 0.3
 
 #define STEP_SIZE 40
-#define STEP_SIZE_Y 30
+#define STEP_SIZE_Y 20
+#define STEP_SIZE_YAW 20
 #define STEP_HEIGHT 40
 #define N_TICKS 100 // number of ticks per cycle
 
@@ -225,11 +226,11 @@ void test_rpy(STATE state) {
     float dis = 20;
 
     roll = map(state.com_vx, 0, 255, -rad, rad);
-    //pitch = map(state.com_vy, 0, 255, -rad, rad);
-    yaw = map(state.com_vy, 0, 255, -rad, rad);
-    x = map(state.com_vz, 0, 255, -dis, dis);
-    //y = map(state.com_roll, 0, 255, -dis, dis);
-    z = map(state.com_roll, 0, 255, -dis, dis);
+    pitch = map(state.com_vy, 0, 255, -rad, rad);
+    yaw = map(state.com_vz, 0, 255, -rad, rad);
+    // x = map(state.com_vz, 0, 255, -dis, dis);
+    // y = map(state.com_roll, 0, 255, -dis, dis);
+    // z = map(state.com_roll, 0, 255, -dis, dis);
 
     leg_FL.compute_IK_XYZ(x, y, z, roll, pitch, yaw);
     leg_BR.compute_IK_XYZ(x, y, z, roll, pitch, yaw);
@@ -277,7 +278,7 @@ void gait_controller(STATE &state) {
     }
 
     //read state change command
-    if (state.com_vx == 127) {
+    if (state.com_vx == 127 && state.com_vy == 127 && state.com_vz == 127) {
         state.comphase = STILL;
     }
     else {
@@ -304,7 +305,7 @@ void gait_controller(STATE &state) {
         state.ticks = 0;
         state.pairs = !state.pairs;
     }
-    test_rpy(state);
+    // test_rpy(state);
     //compute_swing(state);
     //compute_stance(state);
 
@@ -365,40 +366,47 @@ void compute_stance(STATE state) {
     float x;
     float y;
     float z;
+    float yaw;
     //x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
     //y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100);
    
     switch (state.exphase)
     {
     case STEP_TROT:
-        x = 0 - (STEP_SIZE*state.ticks/200); 
+        if (state.com_vx != 127) x = -STEP_SIZE*state.ticks/200; 
+        if (state.com_vy != 127) y = -STEP_SIZE_Y*state.ticks/200; 
+        if (state.com_vz != 127) yaw = -STEP_SIZE_YAW*state.ticks/200;
         break;
     
     case STOP_TROT:
-        x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/200);
+        if (state.com_vx != 127) x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/200);
+        if (state.com_vy != 127) y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/200);
+        if (state.com_vz != 127) yaw = STEP_SIZE_YAW/2 - (STEP_SIZE_YAW*state.ticks/200);
         break;
     
     case TROT:
-        x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
-        //y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100); 
+        if (state.com_vx != 127) x = STEP_SIZE/2 - (STEP_SIZE*state.ticks/100);
+        if (state.com_vy != 127) y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100);
+        if (state.com_vz != 127) yaw = STEP_SIZE_YAW/2 - (STEP_SIZE_YAW*state.ticks/100);
         break;
 
     default:
         x = 0;
-	y = 0;
-	z = 0;
+        y = 0;
+        z = 0;
+        yaw = 0;
         break;
     }
 
     if (state.pairs) {
 
-        leg_FL.compute_IK_XYZ(x, y, 0, 0, 0, 0);
-        leg_BR.compute_IK_XYZ(x, y, 0, 0, 0, 0);
+        leg_FL.compute_IK_XYZ(x, y, 0, 0, 0, yaw);
+        leg_BR.compute_IK_XYZ(x, y, 0, 0, 0, yaw);
     }
 
     else {
-        leg_FR.compute_IK_XYZ(x, y, 0, 0, 0, 0);
-        leg_BL.compute_IK_XYZ(x, y, 0, 0, 0, 0);
+        leg_FR.compute_IK_XYZ(x, y, 0, 0, 0, yaw);
+        leg_BL.compute_IK_XYZ(x, y, 0, 0, 0, yaw);
     }
 }
 
@@ -418,41 +426,50 @@ void compute_swing(STATE state) {
     float x;
     float y;
     float z;
+    float yaw;
+
     //float y = (STEP_SIZE_Y*state.ticks/200) - (STEP_SIZE_Y/4);
     //float z = STEP_HEIGHT*sin(state.ticks*(PI/100));
 
     switch (state.exphase)
     {
     case STEP_TROT:
-        x = (STEP_SIZE*state.ticks/400);
-	z = STEP_HEIGHT*sin(state.ticks*(PI/100));
+        if (state.com_vx != 127) x = (STEP_SIZE*state.ticks/400);
+        if (state.com_vy != 127) y = (STEP_SIZE_Y*state.ticks/400);
+        if (state.com_vz != 127) yaw = (STEP_SIZE_YAW*state.ticks/400);
+	    z = STEP_HEIGHT*sin(state.ticks*(PI/100));
         break;
     
     case STOP_TROT:
-        x = (STEP_SIZE*state.ticks/400) - (STEP_SIZE/4); 
-	z = STEP_HEIGHT*sin(state.ticks*(PI/100));
+        if (state.com_vx != 127) x = (STEP_SIZE*state.ticks/400) - (STEP_SIZE/4); 
+        if (state.com_vy != 127) y = (STEP_SIZE_Y*state.ticks/400) - (STEP_SIZE_Y/4); 
+        if (state.com_vz != 127) yaw = (STEP_SIZE_YAW*state.ticks/400) - (STEP_SIZE_YAW/4); 
+	    z = STEP_HEIGHT*sin(state.ticks*(PI/100));
         break;
 
     case TROT:
-        x = (STEP_SIZE*state.ticks/200) - (STEP_SIZE/4); 
-	z = STEP_HEIGHT*sin(state.ticks*(PI/100));
+        if (state.com_vx != 127) x = (STEP_SIZE*state.ticks/200) - (STEP_SIZE/4); 
+        if (state.com_vy != 127) y = (STEP_SIZE_Y*state.ticks/200) - (STEP_SIZE_Y/4); 
+        if (state.com_vz != 127) yaw = (STEP_SIZE_YAW*state.ticks/200) - (STEP_SIZE_YAW/4); 
+	    z = STEP_HEIGHT*sin(state.ticks*(PI/100));
         break;
     
     default:
         x = 0;
-	y = 0;
-	z = 0;
+        y = 0;
+        z = 0;
+        yaw = 0;
         break;
     }
 
    if (!state.pairs) {
-        leg_FL.compute_IK_XYZ(x, y, z, 0, 0, 0);
-        leg_BR.compute_IK_XYZ(x, y, z, 0, 0, 0);
+        leg_FL.compute_IK_XYZ(x, y, z, 0, 0, yaw);
+        leg_BR.compute_IK_XYZ(x, y, z, 0, 0, yaw);
     }
 
     else {
-        leg_FR.compute_IK_XYZ(x, y, z, 0, 0, 0);
-        leg_BL.compute_IK_XYZ(x, y, z, 0, 0, 0);
+        leg_FR.compute_IK_XYZ(x, y, z, 0, 0, yaw);
+        leg_BL.compute_IK_XYZ(x, y, z, 0, 0, yaw);
     }
 
 }
