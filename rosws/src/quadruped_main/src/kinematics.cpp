@@ -11,8 +11,9 @@
 
 float STEP_SIZE;
 float STEP_SIZE_CRAWL;
+float STEP_SIZE_Y;
+float STEP_SIZE_YAW;
 #define CRAWL_RATE 1
-#define STEP_SIZE_Y 30
 #define STEP_HEIGHT 40
 #define N_TICKS 100 // number of ticks per cycle
 
@@ -177,16 +178,21 @@ void Leg::compute_stance(STATE &state) {
     {
 
     case STEP_TROT:
-        current_x = STEP_SIZE*state.ticks/200; 
+        if (state.com_vx != 127) current_x = STEP_SIZE*state.ticks/200; 
+        if (state.com_vy != 127) current_y = STEP_SIZE_Y*state.ticks/200; 
+        if (state.com_vz != 127) current_yaw = STEP_SIZE_YAW*state.ticks/200; 
     break;
     
     case STOP_TROT:
-        current_x = (STEP_SIZE*state.ticks/200) - STEP_SIZE/2;
+        if (state.com_vx != 127) current_x = (STEP_SIZE*state.ticks/200) - STEP_SIZE/2;
+        if (state.com_vy != 127) current_y = (STEP_SIZE_Y*state.ticks/200) - STEP_SIZE_Y/2;
+        if (state.com_vz != 127) current_yaw = (STEP_SIZE_YAW*state.ticks/200) - STEP_SIZE_YAW/2;
     break;
     
     case TROT:
-        current_x = (STEP_SIZE*state.ticks/100) - STEP_SIZE/2;
-        //y = STEP_SIZE_Y/2 - (STEP_SIZE_Y*state.ticks/100); 
+        if (state.com_vx != 127) current_x = (STEP_SIZE*state.ticks/100) - STEP_SIZE/2;
+        if (state.com_vy != 127) current_y = (STEP_SIZE_Y*state.ticks/100) - STEP_SIZE_Y/2;
+        if (state.com_vz != 127) current_yaw = (STEP_SIZE_YAW*state.ticks/100) - STEP_SIZE_YAW/2;
     break;
 
 	case CRAWL_DIS: //START and STOP steps are not execute in stance
@@ -209,9 +215,10 @@ void Leg::compute_stance(STATE &state) {
         current_x = 0;
 	    current_y = 0;
 	    current_z = 0;
+        current_yaw = 0;
     }
 
-    compute_IK_XYZ(current_x, current_y, 0, 0, 0, 0);
+    compute_IK_XYZ(current_x, current_y, 0, 0, 0, current_yaw);
 }
 
 void Leg::compute_swing(STATE &state) {
@@ -233,17 +240,23 @@ void Leg::compute_swing(STATE &state) {
     {
 
     case STEP_TROT:
-        current_x = 0 - (STEP_SIZE*state.ticks/400);
+        if (state.com_vx != 127) current_x = -STEP_SIZE*state.ticks/400;
+        if (state.com_vy != 127) current_y = -STEP_SIZE_Y*state.ticks/400;
+        if (state.com_vz != 127) current_yaw = -STEP_SIZE_YAW*state.ticks/400;
 	    current_z = STEP_HEIGHT*sin(state.ticks*(PI/100));
         break;
     
     case STOP_TROT:
-        current_x = (STEP_SIZE/4) - (STEP_SIZE*state.ticks/400); 
+        if (state.com_vx != 127) current_x = (STEP_SIZE/4) - (STEP_SIZE*state.ticks/400); 
+        if (state.com_vy != 127) current_y = (STEP_SIZE_Y/4) - (STEP_SIZE_Y*state.ticks/400); 
+        if (state.com_vz != 127) current_yaw = (STEP_SIZE_YAW/4) - (STEP_SIZE_YAW*state.ticks/400); 
 	    current_z = STEP_HEIGHT*sin(state.ticks*(PI/100));
         break;
 
     case TROT:
-        current_x = (STEP_SIZE/4) - (STEP_SIZE*state.ticks/200); 
+        if (state.com_vx != 127) current_x = (STEP_SIZE/4) - (STEP_SIZE*state.ticks/200); 
+        if (state.com_vy != 127) current_y = (STEP_SIZE_Y/4) - (STEP_SIZE_Y*state.ticks/200); 
+        if (state.com_vz != 127) current_yaw = (STEP_SIZE_YAW/4) - (STEP_SIZE_YAW*state.ticks/200); 
 	    current_z = STEP_HEIGHT*sin(state.ticks*(PI/100));
         break;
 
@@ -315,9 +328,10 @@ void Leg::compute_swing(STATE &state) {
         current_x = 0;
 	    current_y = 0;
 	    current_z = 0;
+	    current_yaw = 0;
         break;
     }
-    compute_IK_XYZ(current_x, current_y, current_z, 0, 0, 0);
+    compute_IK_XYZ(current_x, current_y, current_z, 0, 0, current_yaw);
 }
 
 
@@ -352,11 +366,11 @@ void test_rpy(STATE state) {
     float dis = 20;
 
     roll = map(state.com_vx, 0, 255, -rad, rad);
-    //pitch = map(state.com_vy, 0, 255, -rad, rad);
-    yaw = map(state.com_vy, 0, 255, -rad, rad);
-    x = map(state.com_vz, 0, 255, -dis, dis);
+    pitch = map(state.com_vy, 0, 255, -rad, rad);
+    yaw = map(state.com_vz, 0, 255, -rad, rad);
+    // x = map(state.com_vz, 0, 255, -dis, dis);
     //y = map(state.com_roll, 0, 255, -dis, dis);
-    z = map(state.com_roll, 0, 255, -dis, dis);
+    // z = map(state.com_roll, 0, 255, -dis, dis);
 
     leg_FL.compute_IK_XYZ(x, y, z, roll, pitch, yaw);
     leg_BR.compute_IK_XYZ(x, y, z, roll, pitch, yaw);
@@ -417,18 +431,34 @@ void gait_controller(STATE &state) {
     
     case NORM:
         //read state change command
-        if (state.com_vx == 127) {
+        if (state.com_vx == 127 && state.com_vy == 127 && state.com_vz == 127) {
             state.comphase = STILL;
         }
-        else if (state.com_vx > 127) {
+        else {
             state.comphase = TROT;
-	    STEP_SIZE = 40;
-        }
 
-        else if (state.com_vx < 127) {
-            state.comphase = TROT;
-            STEP_SIZE = -40;
+            if (state.com_vx > 127) {
+                STEP_SIZE = 40;
+            }
+            else if (state.com_vx < 127) {
+                STEP_SIZE = -40;
+            }
+
+            if (state.com_vy > 127) {
+                STEP_SIZE_Y = 20;
+            }
+            else if (state.com_vy < 127) {
+                STEP_SIZE_Y = -20;
+            }
+
+            if (state.com_vz > 127) {
+                STEP_SIZE_YAW = 0.17453;
+            }
+            else if (state.com_vz < 127) {
+                STEP_SIZE_YAW = -0.17453;
+            }
         }
+        
 
         if (state.exphase == STILL && state.comphase == TROT) {
 		state.exphase = STEP_TROT;
