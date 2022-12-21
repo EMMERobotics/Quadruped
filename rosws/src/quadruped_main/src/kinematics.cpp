@@ -555,11 +555,13 @@ void gait_controller(STATE &state) {
         }
 	break;
     case RPY:
-        rpy(state);
+	rpy(state);
 	break;
 
     default:
         state.exphase = STILL;
+
+    //test_rpy(state);
 
     //static_trot(state);
     //stand(state);

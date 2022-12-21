@@ -7,7 +7,7 @@
 
 #define DEBUG
 //#define VERBOSE
-
+int mode_tmp = 0;
 
 STATE robot_state = { 
 
@@ -68,7 +68,7 @@ void joy_callback(const quadruped_main::con_msg::ConstPtr& msg) {
     //ROS_INFO("Value x1 is: [%i]", msg->val_x1);
     //ROS_INFO("Value x1 is: [%i]", msg->val_y1);
     //ROS_INFO("Value x2 is: [%i]", msg->val_x2);
-    //ROS_INFO("Value y2 is: [%i]", msg->val_y2);
+    ROS_INFO("Value y2 is: [%i]", msg->b_x);
   #endif
 
   robot_state.com_vx = msg->val_y1;
@@ -76,9 +76,8 @@ void joy_callback(const quadruped_main::con_msg::ConstPtr& msg) {
   robot_state.com_vz = msg->val_y2;
   robot_state.com_roll = msg->val_x2;
 
-  if (msg->b_x == 1) robot_state.mode = NORM;
-  if (msg->b_o == 1) robot_state.mode = CRAWL;
-  if (msg->b_sq == 1) robot_state.mode = RPY;
+  mode_tmp = msg->b_x;
+
 
 }
 
@@ -97,7 +96,21 @@ int main(int argc, char **argv)
   robot_state.exphase = STILL;
   while (ros::ok())
   {
-    
+	  ROS_INFO("mode_tmp: %d:", mode_tmp);
+   switch (mode_tmp) {
+  case 0:
+	  robot_state.mode = NORM;
+	  ROS_INFO("NORM");
+	  break;
+  case 1:
+		  ROS_INFO("RPY"); 
+		  robot_state.mode = RPY;
+	  break;
+  case 2:
+	  robot_state.mode = CRAWL;
+	  ROS_INFO("CRAWL");
+	  break;
+  } 
     gait_controller(robot_state);
 
     #ifdef VERBOSE
