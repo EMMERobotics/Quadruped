@@ -5,6 +5,9 @@
 #include "kinematics/kinematics.h"
 #include <quadruped_main/con_msg.h>
 
+#define DEBUG
+//#define VERBOSE
+int mode_tmp = 0;
 
 STATE robot_state = { 
 
@@ -24,7 +27,6 @@ STATE robot_state = {
     .p_z = 0,
 
     .ticks = 0,
-    .mode = 0,
     .pairs = true,
 
     .com_vx = 0,
@@ -33,8 +35,11 @@ STATE robot_state = {
     .com_roll = 0,
 
     .exphase = STILL,
-    .comphase = STILL
+    .comphase = STILL,
 
+    .mode = NORM,
+    .crawlphase = BACK_RIGHT,
+    .crawl_completed = false
 
 };
 
@@ -54,21 +59,24 @@ void parse_motor_command(ros::Publisher pub, Leg leg) {
 }
 
 void joy_callback(const quadruped_main::con_msg::ConstPtr& msg) {
-	
+
+  #ifdef VERBOSE
+    ROS_INFO("Getting Controller");
+  #endif
+
+  #ifdef DEBUG
     //ROS_INFO("Value x1 is: [%i]", msg->val_x1);
     //ROS_INFO("Value x1 is: [%i]", msg->val_y1);
     //ROS_INFO("Value x2 is: [%i]", msg->val_x2);
-    //ROS_INFO("Value y2 is: [%i]", msg->val_y2);
-    
+    ROS_INFO("Value y2 is: [%i]", msg->b_x);
+  #endif
 
-    robot_state.com_vx = msg->val_y1;
-    robot_state.com_vy = msg->val_x1;
-    robot_state.com_vz = msg->val_y2;
-    robot_state.com_roll = msg->val_x2;
-    //command.v_y = msg->val_x1;
-    //command.v_z = msg->val_x2;
-    //command.roll = msg->val_y2;
-   // ROS_INFO("Value x1 is: [%i]", robot_state.com_vx);
+  robot_state.com_vx = msg->val_y1;
+  robot_state.com_vy = msg->val_x1;
+  robot_state.com_vz = msg->val_y2;
+  robot_state.com_roll = msg->val_x2;
+
+  mode_tmp = msg->b_x;
 
 
 }
@@ -82,25 +90,49 @@ int main(int argc, char **argv)
   ros::Subscriber sub = n.subscribe("joy_val", 10000, joy_callback);
   ros::Rate loop_rate(100);
 
+  #ifdef VERBOSE
+    ROS_INFO("Kinemtaics Node Initilized");
+  #endif
+  robot_state.exphase = STILL;
   while (ros::ok())
   {
-
-    geometry_msgs::Twist motor_command;
-
-    //GET_COMMAND()
-
-    ROS_INFO("ex: %d", robot_state.exphase);
-    //ROS_INFO("com:    %d", robot_state.comphase);
-    ROS_INFO("tickks:     %d", robot_state.ticks);
-    //ROS_INFO("pairs:           %d", robot_state.pairs);
+	  ROS_INFO("mode_tmp: %d:", mode_tmp);
+   switch (mode_tmp) {
+  case 0:
+	  robot_state.mode = NORM;
+	  ROS_INFO("NORM");
+	  break;
+  case 1:
+		  ROS_INFO("RPY"); 
+		  robot_state.mode = RPY;
+	  break;
+  case 2:
+	  robot_state.mode = CRAWL;
+	  ROS_INFO("CRAWL");
+	  break;
+  } 
     gait_controller(robot_state);
+
+    #ifdef VERBOSE
+      ROS_INFO("Publishing Motor");
+    #endif
+
     parse_motor_command(motor_comm_pub, leg_FL);
     parse_motor_command(motor_comm_pub, leg_FR);
     parse_motor_command(motor_comm_pub, leg_BL);
     parse_motor_command(motor_comm_pub, leg_BR);
 
-    //ROS_INFO("%f", motor_command.x);
-
+    #ifdef DEBUG
+    ROS_INFO("com: %d", robot_state.comphase);
+    ROS_INFO("ph: %d", robot_state.mode);
+    ROS_INFO("ex:    %d", robot_state.exphase);
+    ROS_INFO("tic:    %d", robot_state.ticks);
+    //ROS_INFO("HIP:       %f", leg_FL.hipAngle);
+    //ROS_INFO("FEM:         %f", leg_FL.femurAngle);
+    //ROS_INFO("TIB:            %f", leg_FL.tibiaAngle);
+    //ROS_INFO("CRAWL:    %d", robot_state.crawlphase);
+    //ROS_INFO("pairs:           %d", robot_state.pairs);
+    #endif
     ros::spinOnce();
     loop_rate.sleep();
     

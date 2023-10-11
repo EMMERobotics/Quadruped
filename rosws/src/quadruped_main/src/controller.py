@@ -40,6 +40,7 @@ def joystick():
     pub = rospy.Publisher('joy_val', con_msg, queue_size=10)
     rospy.init_node('joystick', anonymous=True)
     rate = rospy.Rate(100) # 10hz
+    depress = False
 
     while not rospy.is_shutdown():
         #read value from controller
@@ -48,14 +49,30 @@ def joystick():
             if event.type == 3:             #A stick is moved
                 if event.code == 4:         #Y axis on right stick
                     msg.val_y2 = deadzone(event.value, 127, 64)
+                    print(event.value)
                 if event.code == 3:         #X axis on right stick
                     msg.val_x2 = deadzone(event.value, 127, 64)
+                    print(event.value)
                 if event.code == 0:         #X axis on left stick
                     msg.val_x1 = deadzone(event.value, 127, 64)
+                    print(event.value)
                 if event.code == 1:         #Y axis on left stick
                     msg.val_y1 = deadzone(event.value, 127, 64)
+                    print(event.value)
 
-        #rospy.loginfo(con_msg.val_y2)
+            if event.type == 1 and depress == False:
+                if event.code == 307:
+                    msg.b_tri = event.value
+                if event.code == 305:
+                    msg.b_x = 1
+                if event.code == 304:
+                    msg.b_x = 0
+                if event.code == 308:
+                    msg.b_x = 2
+                depress = True
+            elif event.type == 1 and depress == True:
+                depress = False
+        rospy.loginfo(msg.val_y2)
         pub.publish(msg)
         rate.sleep()
 
